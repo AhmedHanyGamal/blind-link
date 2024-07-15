@@ -1,0 +1,15 @@
+{
+  "name": "blind-link",
+  "version": "1.0.0",
+  "description": "A web project that enables you to send an email while knowing for a fact that no one on this earth can read it without permission, not even the server owner.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ahmed Hany G.",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "express": "^4.19.2",
+    "sqlite3": "^5.1.7"
+  }
+}
