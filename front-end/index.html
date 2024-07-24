@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blind Link</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="persist-data-modal" class="modal hide">
+      <div class="modal-message">
+        <form>
+          <br /><br />
+          <label>
+            Blind Link wants permission to save application data persistently
+          </label>
+          <br /><br />
+          <label>
+            Refusing to do so means that your data could get deleted by the
+            browser at any moment
+          </label>
+          <br /><br />
+          <label>
+            No data outside this website can be accessed by this website, so you
+            shouldn't worry about getting hacked ( from us at least :^) )
+          </label>
+          <br /><br /><br /><br />
+
+          <button type="button" id="persist-data" style="max-width: 15%">
+            I LOVE persistent data
+          </button>
+          <button type="button" id="dont-persist-data" style="max-width: 15%">
+            I HATE persistent data
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div id="public-key-modal" class="modal hide">
+      <div class="modal-message">
+        <p id="display-encryption-public-key">Your encryption public key:</p>
+        <br />
+        <p id="display-verification-public-key">
+          Your verification public key:
+        </p>
+      </div>
+      <div class="modal-button modal-close-button">close</div>
+    </div>
+
+    <div id="add-friend-modal" class="modal hide">
+      <div class="modal-message">
+        <form id="add-friend-form">
+          <label>Friend's saved name</label>
+          <input
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            id="friend-name"
+            placeholder="Mahmoud El-Samannoudy"
+            required
+          />
+          <br />
+          <br />
+          <!-- <label for="adding-friends">Enter friend's public key<br /></label> -->
+          <label>Enter friend's encryption public key</label>
+          <textarea
+            autocomplete="off"
+            spellcheck="false"
+            id="friend-encryption-public-key"
+            placeholder="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtjhau5i0TKS0Gzm7qRIAoEOMJARdCUOff255xgcSvhos/J1LuQNmJkjLE18TTNIQt5YXtuo3wyVjCP1hGaTKLJNVoLK3Pgw9EzkpqBY2jF++zINleHFpbVQxlb0vaEOG+EfN0NcvaD7buG+JclBUPH4AgzQ/9fRPrxoHIf42tGykZ4Dgfcp1gvTPRONzaiBJdpH+FQnSDVBRG3rsd/pi+DcA1DTwz16HBH93WCizn2778qEOafG55MyD4SWcryjnrUEz36zoePf8D/7hp02yyqwTM+Y9JursxljQduYauLC0IgPwxqwTxC17r0nvGZMwYmngwi/D0k4zgkkySZDe9QIDAQAB"
+            rows="5"
+            required
+          ></textarea>
+          <br />
+          <label>Enter friend's verification public key</label>
+          <textarea
+            autocomplete="off"
+            spellcheck="false"
+            id="friend-verification-public-key"
+            placeholder="MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEVKWe6awuDcielsg22UNgqz3Q8JdDTX8YyN5YbnUYkXS3VlXiQ1u7SPeVJ303bZgT2eEndC1KvguzBg97dz4Fxg=="
+            rows="5"
+            required
+          ></textarea>
+          <br />
+          <!-- <br /> -->
+          <!-- <label for="adding-friends">Introduce yourself</label> <br /> -->
+          <label>Introduce yourself</label> <br />
+          <textarea
+            autocomplete="off"
+            spellcheck="false"
+            id="introduction-message"
+            placeholder="Hello Mahmoud, this is Reyad El-Bantalouny. please accept my friend request."
+            rows="5"
+            required
+          ></textarea
+          ><br /><br />
+
+          <button type="button" id="send-friend-request-button">
+            send request
+          </button>
+        </form>
+      </div>
+    </div>
+    <div id="change-contact-username-modal" class="small-modal hide">
+      <div class="modal-message">
+        <form id="change-contact-username-form">
+          <br />
+          <!-- <label for="changing-contact-username">new contact name <br /></label> -->
+          <label>new contact name <br /></label>
+          <input
+            autocomplete="off"
+            type="text"
+            id="change-contact-username-input"
+            name="change-contact-username-input"
+            required
+          />
+          <br />
+          <br />
+          <button type="submit">change</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="leftSide">
+        <!-- Header -->
+        <div class="header">
+          <!-- <div class="userimg">
+                    <img src="images/user.jpg" alt="" class="cover">
+                </div> -->
+          <!-- <ul class="nav_icons">
+                    <li><ion-icon name="scan-circle-outline"></ion-icon></li>
+                    <li><ion-icon name="chatbox"></ion-icon></li>
+                    <li><ion-icon name="ellipsis-vertical"></ion-icon></li>
+                </ul> -->
+
+          <div class="dropdown">
+            <img
+              class="dropdown_button"
+              src="./images/friend-request-pending-icon.png"
+              alt="pending friend request"
+            />
+            <ul class="dropdown_content hide">
+              <li>mohamed baramyly</li>
+              <li>sad asfak</li>
+            </ul>
+          </div>
+
+          <img
+            id="friend-request-form-button"
+            src="./images/add-friends-transparent-icon.png"
+            alt="add friend"
+          />
+          <img
+            id="public-key-viewer"
+            src="./images/key-icon.jpg"
+            alt="my public key"
+          />
+
+          <button type="button" class="check_mail_button" id="check-mail">
+            Check Mail
+          </button>
+        </div>
+        <!-- Search Chat -->
+        <!-- <div class="search_chat">
+          <div>
+            <input type="text" placeholder="Search or start new chat" />
+            <ion-icon name="search-outline"></ion-icon>
+          </div>
+        </div> -->
+        <!-- CHAT LIST -->
+        <div class="chatlist">
+          <div class="block active">
+            <!-- <div class="imgBox">
+              <img src="images/img1.jpg" class="cover" alt="" />
+            </div> -->
+            <div class="details">
+              <div class="listHead">
+                <h4>Michael Diab Al-Mansori</h4>
+                <p class="time">10:56</p>
+              </div>
+              <div class="message_p">
+                <p>How are you doing?</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="block unread">
+            <!-- <div class="imgBox">
+              <img src="images/img2.jpg" class="cover" alt="" />
+            </div> -->
+            <div class="details">
+              <div class="listHead">
+                <h4>Andre</h4>
+                <p class="time">12:34</p>
+              </div>
+              <div class="message_p">
+                <p>I love your youtube videos!</p>
+                <b>1</b>
+              </div>
+            </div>
+          </div>
+
+          <div class="block unread">
+            <!-- <div class="imgBox">
+              <img src="images/img3.jpg" class="cover" alt="" />
+            </div> -->
+            <div class="details">
+              <div class="listHead">
+                <h4>Olivia</h4>
+                <p class="time">Yesterday</p>
+              </div>
+              <div class="message_p">
+                <p>I just subscribed to your channel</p>
+                <b>2</b>
+              </div>
+            </div>
+          </div>
+          <div class="block">
+            <!-- <div class="imgBox">
+              <img src="images/img4.jpg" class="cover" alt="" />
+            </div> -->
+            <div class="details">
+              <div class="listHead">
+                <h4>Parker</h4>
+                <p class="time">Yesterday</p>
+              </div>
+              <div class="message_p">
+                <p>Hey!</p>
+              </div>
+            </div>
+          </div>
+          <div class="block">
+            <!-- <div class="imgBox">
+              <img src="images/img7.jpg" class="cover" alt="" />
+            </div> -->
+            <div class="details">
+              <div class="listHead">
+                <h4>Zoey</h4>
+                <p class="time">18/01/2022</p>
+              </div>
+              <div class="message_p">
+                <p>I'll get back to you</p>
+              </div>
+            </div>
+          </div>
+          <div class="block">
+            <!-- <div class="imgBox">
+              <img src="images/img8.jpg" class="cover" alt="" />
+            </div> -->
+            <div class="details">
+              <div class="listHead">
+                <h4>Josh</h4>
+                <p class="time">17/01/2022</p>
+              </div>
+              <div class="message_p">
+                <p>Congratulations</p>
+              </div>
+            </div>
+          </div>
+          <div class="block">
+            <!-- <div class="imgBox">
+              <img src="images/img9.jpg" class="cover" alt="" />
+            </div> -->
+            <div class="details">
+              <div class="listHead">
+                <h4>Dian</h4>
+                <p class="time">15/01/2022</p>
+              </div>
+              <div class="message_p">
+                <p>Thanks alot</p>
+              </div>
+            </div>
+          </div>
+          <div class="block">
+            <!-- <div class="imgBox">
+              <img src="images/img5.jpg" class="cover" alt="" />
+            </div> -->
+            <div class="details">
+              <div class="listHead">
+                <h4>Sam</h4>
+                <p class="time">Yesterday</p>
+              </div>
+              <div class="message_p">
+                <p>Did you finish the project?</p>
+              </div>
+            </div>
+          </div>
+          <div class="block">
+            <!-- <div class="imgBox">
+              <img src="images/img6.jpg" class="cover" alt="" />
+            </div> -->
+            <div class="details">
+              <div class="listHead">
+                <h4>Junior</h4>
+                <p class="time">18/01/2022</p>
+              </div>
+              <div class="message_p">
+                <p>Nice course</p>
+              </div>
+            </div>
+          </div>
+          <div class="block">
+            <!-- <div class="imgBox">
+              <img src="images/img7.jpg" class="cover" alt="" />
+            </div> -->
+            <div class="details">
+              <div class="listHead">
+                <h4>Zoey</h4>
+                <p class="time">18/01/2022</p>
+              </div>
+              <div class="message_p">
+                <p>I'll get back to you</p>
+              </div>
+            </div>
+          </div>
+          <div class="block">
+            <!-- <div class="imgBox">
+              <img src="images/img8.jpg" class="cover" alt="" />
+            </div> -->
+            <div class="details">
+              <div class="listHead">
+                <h4>Josh</h4>
+                <p class="time">17/01/2022</p>
+              </div>
+              <div class="message_p">
+                <p>Congratulations</p>
+              </div>
+            </div>
+          </div>
+          <div class="block">
+            <!-- <div class="imgBox">
+              <img src="images/img9.jpg" class="cover" alt="" />
+            </div> -->
+            <div class="details">
+              <div class="listHead">
+                <h4>Dian</h4>
+                <p class="time">15/01/2022</p>
+              </div>
+              <div class="message_p">
+                <p>Thanks alot</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="rightSide">
+        <div class="header">
+          <div class="imgText">
+            <!-- <div class="userimg">
+              <img src="images/img1.jpg" alt="" class="cover" />
+            </div> -->
+            <h4>Michael Diab Al-Mansori<br /></h4>
+          </div>
+
+          <div class="dropdown">
+            <ion-icon
+              class="dropdown_button"
+              name="ellipsis-vertical"
+            ></ion-icon>
+
+            <ul class="dropdown_content hide">
+              <li id="change-contact-username-button">change contact name</li>
+              <!-- <li>test</li> -->
+            </ul>
+          </div>
+
+          <!-- <ul class="nav_icons"> -->
+          <!-- This will have one thing, change contact name -->
+          <!-- <li><ion-icon name="ellipsis-vertical"></ion-icon></li> -->
+          <!-- </ul> -->
+        </div>
+
+        <!-- CHAT-BOX -->
+        <div class="chatbox">
+          <div class="message my_msg">
+            <p>Hi <br /><span>12:18</span></p>
+          </div>
+          <div class="message friend_msg">
+            <p>Hey <br /><span>12:18</span></p>
+          </div>
+          <div class="message my_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.
+              <br /><span>12:15</span>
+            </p>
+          </div>
+          <div class="message friend_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.
+              <br /><span>12:15</span>
+            </p>
+          </div>
+          <div class="message my_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Lorem
+              ipsum dolor sit amet consectetur adipisicing elit. Eaque aliquid
+              fugiat accusamus dolore qui vitae ratione optio sunt <br /><span
+                >12:15</span
+              >
+            </p>
+          </div>
+          <div class="message friend_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.
+              <br /><span>12:15</span>
+            </p>
+          </div>
+          <div class="message my_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur <br /><span>12:15</span>
+            </p>
+          </div>
+          <div class="message friend_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
+                >12:15</span
+              >
+            </p>
+          </div>
+          <div class="message my_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
+                >12:15</span
+              >
+            </p>
+          </div>
+          <div class="message friend_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
+                >12:15</span
+              >
+            </p>
+          </div>
+          <div class="message my_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
+                >12:15</span
+              >
+            </p>
+          </div>
+          <div class="message friend_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
+                >12:15</span
+              >
+            </p>
+          </div>
+          <div class="message my_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
+                >12:15</span
+              >
+            </p>
+          </div>
+          <div class="message friend_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
+                >12:15</span
+              >
+            </p>
+          </div>
+          <div class="message my_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
+                >12:15</span
+              >
+            </p>
+          </div>
+          <div class="message friend_msg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
+                >12:15</span
+              >
+            </p>
+          </div>
+        </div>
+
+        <!-- CHAT INPUT -->
+        <div class="chat_input">
+          <!-- <ion-icon name="happy-outline"></ion-icon> -->
+          <!-- <ion-icon name="happy-outline"></ion-icon> -->
+          <textarea
+            autocomplete="off"
+            spellcheck="false"
+            id="chat-message"
+            placeholder="Type a message"
+            rows="1"
+            required
+          ></textarea>
+          <!-- <ion-icon name="mic"></ion-icon> -->
+        </div>
+      </div>
+    </div>
+
+    <!-- <script src="./temp.js"></script> -->
+    <script type="module" src="./database_initializer.js"></script>
+    <!-- <script src="./initiate_client.js"></script> -->
+    <script src="./toggle_visibility.js"></script>
+    <script type="module" src="./controller.js"></script>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
+  </body>
+</html>
