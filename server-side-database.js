@@ -1,8 +1,10 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
+const cors = require("cors");
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -21,18 +23,19 @@ const db = new sqlite3.Database(
 db.serialize(() => {
   db.run(
     // note 3. The id being an INTEGER could cause a problem in the VERY DISTANT future (overflow)
-    `CREATE TABLE IF NOT EXISTS encrypted_messages (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp INTEGER, encrypted_message TEXT)`
+    //                     could change the timestamp to TEXT or something (read the SQLite3 docs)
+    `CREATE TABLE IF NOT EXISTS encrypted_data (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp INTEGER, encrypted_data TEXT)`
   ); // note 4. timestamp could either be done as seconds
   // or it could be done as milli-seconds, so that there wouldn't be any collision when saving two new entries sequentially to the database
 });
 
 app.get("/api/get-messages", (req, res) => {
-  const timestamp = req.query.timestamp;
-  if (!timestamp) {
+  const message_id = parseInt(req.query.message_id, 10);
+  if (isNaN(message_id)) {
     return res.status(404).json({
       success: false,
       error_description:
-        "timestamp is required in order to get the messages after it",
+        "message_id has to be set with a valid number in order to get the messages after it",
     });
   }
 
@@ -40,8 +43,8 @@ app.get("/api/get-messages", (req, res) => {
   // could use db.each instead, but still thinking it through
 
   db.all(
-    "SELECT * FROM encrypted_messages WHERE timestamp >= ?",
-    timestamp,
+    "SELECT * FROM encrypted_data WHERE id >= ?",
+    message_id,
     (err, rows) => {
       if (err) {
         return res
@@ -56,20 +59,18 @@ app.get("/api/get-messages", (req, res) => {
 
 //question: sequential vs parallel
 app.post("/api/post-message", (req, res) => {
-  const { encrypted_message } = req.body;
+  const encryptedData = req.body;
 
-  if (!encrypted_message) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        error_description: "there has to be a message to send",
-      });
+  if (!encryptedData) {
+    return res.status(400).json({
+      success: false,
+      error_description: "there has to be a message to send",
+    });
   }
 
   db.run(
-    "INSERT INTO encrypted_messages(timestamp, encrypted_message) VALUES (?, ?)",
-    [Date.now(), encrypted_message],
+    "INSERT INTO encrypted_data(timestamp, encrypted_data) VALUES (?, ?)",
+    [Date.now(), encryptedData],
     (err) => {
       if (err) {
         return res.status(500).json({
