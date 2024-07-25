@@ -354,7 +354,7 @@ async function decrypt_data(encryptedData, privateKey) {
   return JSON.parse(jsonString);
 }
 
-async function getDecryptionPrivateKey() {
+async function get_decryption_private_key() {
   const db = await openDataBase("BlindLink", 1);
   const myKeysStore = getObjectStore(db, "myKeys", "readonly");
   const record = await getFirstRecord(myKeysStore);
@@ -383,7 +383,7 @@ async function check_mail() {
     return;
   }
 
-  const myDecryptionPrivateKey = await getDecryptionPrivateKey();
+  const myDecryptionPrivateKey = await get_decryption_private_key();
   // const dbRequest = indexedDB.open("BlindLink", 1);
   // dbRequest.onsuccess = (e) => {
   //   const db = e.target.result;

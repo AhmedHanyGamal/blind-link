@@ -95,11 +95,11 @@ async function main() {
         const myKeysStore2 = tx.objectStore("myKeys");
         myKeysStore2.add(userKeys).onsuccess = () => {
           console.log("welcome new user, happy to have you with us");
-          displayKeys(db);
+          display_keys(db);
         };
       } else {
         console.log("welcome back, user");
-        displayKeys(db);
+        display_keys(db);
       }
     };
     //------------------------------------------------------------------------------------
@@ -133,7 +133,7 @@ async function main() {
     // const myKeysStore = tx.objectStore("myKeys");
     // myKeysStore.add(myKeys);
 
-    function displayKeys(db) {
+    function display_keys(db) {
       const tx = db.transaction("myKeys", "readonly");
       const myKeysStore3 = tx.objectStore("myKeys");
 
@@ -178,7 +178,7 @@ main();
 
 // Solve this FUCKING PERSISTENT DATA BULLSHIT
 // We can fix the whole persistent data thing with Michael isA
-async function persistData() {
+async function persist_data() {
   if (navigator.storage) {
     const isPersistent = await navigator.storage.persisted();
     if (!isPersistent) {
@@ -195,7 +195,7 @@ async function persistData() {
   // console.log("bob1");
 }
 
-persistData();
+persist_data();
 // async function test() {
 // await persistData();
 // }
