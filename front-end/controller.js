@@ -8,6 +8,7 @@ import {
   openDataBase,
   getObjectStore,
   getFirstRecord,
+  addEntry,
 } from "./indexedDB_helper.js";
 // let request = indexedDB.open("BlindLink", 1);
 
@@ -53,38 +54,63 @@ async function string_to_public_key(publicKeyString, keyUse) {
   }
 }
 
+async function encrypt_data(data, publicKey, chunkSize = 200) {
+  const encoder = new TextEncoder();
+  const encodedData = encoder.encode(data);
+  const encryptedChunks = [];
+  for (let i = 0; i < encodedData.length; i += chunkSize) {
+    const chunk = encodedData.slice(i, i + chunkSize);
+    const encryptedChunk = await crypto.subtle.encrypt(
+      { name: "RSA-OAEP" },
+      publicKey,
+      chunk
+    );
+
+    encryptedChunks.push(new Uint8Array(encryptedChunk));
+  }
+
+  const combinedChunks = encryptedChunks.reduce((acc, cur) => {
+    return acc.concat(Array.from(cur));
+  }, []);
+
+  return combinedChunks;
+}
+
 async function send_message(jsObject, encryptionPublicKey) {
   //DON'T FORGET TO ENCRYPT YOUR DATA
   // const data = { encrypted_message: message };
   // try {
-  console.log("log 1");
+  // console.log("log 1");
   // encodedData need to be split into chunks before encryption
-  const encodedData = object_to_array_buffer(jsObject); // potential problem 1
+  // const encodedData = object_to_array_buffer(jsObject); // potential problem 1
   // const encoder = new TextEncoder();
   // const encodedData = encoder.encode("I FUCKING HATE YOU").buffer;
 
-  console.log("log 2", encodedData.constructor.name);
-  if (encryptionPublicKey instanceof CryptoKey) {
-    console.log("something else is wrong");
-  } else {
-    console.log("FOUND IT, IT'S THE PUBLIC KEY MATHAFACKA");
-  }
+  // console.log("log 2", encodedData.constructor.name);
+  // if (encryptionPublicKey instanceof CryptoKey) {
+  //   console.log("something else is wrong");
+  // } else {
+  //   console.log("FOUND IT, IT'S THE PUBLIC KEY MATHAFACKA");
+  // }
 
-  console.log("Encryption Public Key:", encryptionPublicKey);
-  console.log("Is CryptoKey:", encryptionPublicKey instanceof CryptoKey);
-  console.log("Encoded Data:", encodedData);
-  console.log("Is ArrayBuffer:", encodedData instanceof ArrayBuffer);
+  // console.log("Encryption Public Key:", encryptionPublicKey);
+  // console.log("Is CryptoKey:", encryptionPublicKey instanceof CryptoKey);
+  // console.log("Encoded Data:", encodedData);
+  // console.log("Is ArrayBuffer:", encodedData instanceof ArrayBuffer);
 
-  console.log(encodedData.byteLength);
+  // console.log(encodedData.byteLength);
 
   // try {
   // apparently you can't FUCKING encrypt something that is bigger than 245 bytes
   // AAAAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHHHHHHH
-  const encryptedData = await crypto.subtle.encrypt(
-    { name: "RSA-OAEP" },
-    encryptionPublicKey,
-    encodedData
-  );
+
+  const encryptedData = await encrypt_data(jsObject, encryptionPublicKey);
+
+  // const encryptedData = await crypto.subtle.encrypt(
+  //   { name: "RSA-OAEP" },
+  //   encryptionPublicKey,
+  //   encodedData
+  // );
   // } catch (error) {
   //   console.error("an error occurred: ", error);
   // }
@@ -100,7 +126,7 @@ async function send_message(jsObject, encryptionPublicKey) {
   //   throw error;
   // }
   // try {
-  console.log("log 3");
+  // console.log("log 3");
 
   // const encryptedDataBase64 = array_buffer_to_base64(encryptedData);
 
@@ -123,10 +149,10 @@ async function send_message(jsObject, encryptionPublicKey) {
       return response.json();
     })
     .then((data) => {
-      console.log("Success:", data);
+      console.log("Successfully sent encrypted message:", data);
     })
     .catch((error) => {
-      console.error("Error:", error);
+      console.error("Failed to send encrypted message:", error);
     });
   // } catch (error) {
   //   console.error("an error occurred: ", error);
@@ -157,7 +183,7 @@ async function verify_signature(publicKey, message, signature) {
 }
 
 async function send_friend_request() {
-  console.log("very beginning");
+  // console.log("very beginning");
 
   const friendEncryptionPublicKeyBase64 = document
     .querySelector("#friend-encryption-public-key")
@@ -172,8 +198,8 @@ async function send_friend_request() {
 
   const friendName = document.querySelector("#friend-name").value.trim();
 
-  console.log("trimmed and stuff");
-  console.log('"' + friendEncryptionPublicKeyBase64 + '"');
+  // console.log("trimmed and stuff");
+  // console.log('"' + friendEncryptionPublicKeyBase64 + '"');
 
   if (
     !(
@@ -187,18 +213,18 @@ async function send_friend_request() {
     return;
   }
 
-  console.log("everything was entered");
+  // console.log("everything was entered");
 
   // convert base64 to actual key --------------------------------------------------
   const friendEncryptionPublicKey = await base64_to_public_key(
     friendEncryptionPublicKeyBase64,
     "encrypt"
   );
-  console.log("just imported the public key");
-  console.log("Encryption Public Key:", friendEncryptionPublicKey);
-  console.log("Is CryptoKey:", friendEncryptionPublicKey instanceof CryptoKey);
+  // console.log("just imported the public key");
+  // console.log("Encryption Public Key:", friendEncryptionPublicKey);
+  // console.log("Is CryptoKey:", friendEncryptionPublicKey instanceof CryptoKey);
 
-  console.log("converted string to public key");
+  // console.log("converted string to public key");
 
   // const friendVerificationPublicKey = base64_to_public_key(friendVerificationPublicKeyBase64, "verify");
 
@@ -208,14 +234,24 @@ async function send_friend_request() {
   // send both YOUR public keys
   // encrypt using HIS public key
 
+  const newContact = {
+    friend_status: "pending",
+    contact_name: friendName,
+    encryption_public_key: friendEncryptionPublicKeyBase64,
+    verification_public_key: friendVerificationPublicKeyBase64,
+  };
+
   const db = await openDataBase("BlindLink", 1);
+  const myContactsStore = getObjectStore(db, "contacts", "readwrite");
+  addEntry(myContactsStore, newContact);
+
   const myKeysStore = getObjectStore(db, "myKeys", "readonly");
   const record = await getFirstRecord(myKeysStore);
   const myEncryptionPublicKey = record.encryption_public_key;
   const myVerificationPublicKey = record.verification_public_key;
   const mySignaturePrivatekey = record.signature_private_key;
 
-  console.log("got everything from the IndexedDB database");
+  // console.log("got everything from the IndexedDB database");
 
   // let request = indexedDB.open("BlindLink", 1);
   // request.onsuccess = (e) => {
@@ -253,7 +289,7 @@ async function send_friend_request() {
     introductionMessage
   );
 
-  console.log("signed the message");
+  // console.log("signed the message");
 
   const data = {
     messageType: "friend request",
@@ -263,7 +299,7 @@ async function send_friend_request() {
     verificationPublicKey: myVerificationPublicKey,
   };
 
-  console.log("made the data");
+  // console.log("made the data");
 
   // const data = {
   //   type: "friend request",
@@ -280,7 +316,7 @@ async function send_friend_request() {
   //   encoded_data
   // );
 
-  console.log("about to enter send_message");
+  // console.log("about to enter send_message");
 
   send_message(data, friendEncryptionPublicKey);
   //   send_message(document.querySelector("#introduction-message").value);
