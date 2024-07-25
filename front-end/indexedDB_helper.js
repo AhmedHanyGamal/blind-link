@@ -17,6 +17,16 @@ function getObjectStore(db, storeName, mode) {
   return db.transaction(storeName, mode).objectStore(storeName);
 }
 
+function addEntry(objectStore, data) {
+  const addRequest = objectStore.add(data);
+  addRequest.onsuccess = () => console.log("successfully added to database");
+  addRequest.onerror = (event) => {
+    console.error(
+      `error adding data to the ${objectStore} store. Error: ${event.target.errorCode}`
+    );
+  };
+}
+
 function getFirstRecord(objectStore) {
   return new Promise((resolve, reject) => {
     const request = objectStore.openCursor();
@@ -36,4 +46,4 @@ function getFirstRecord(objectStore) {
   });
 }
 
-export { openDataBase, getObjectStore, getFirstRecord };
+export { openDataBase, getObjectStore, addEntry, getFirstRecord };
