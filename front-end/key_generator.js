@@ -78,28 +78,77 @@ function base64_to_array_buffer(base64) {
   return bytes.buffer;
 }
 
+function array_buffer_to_base64(buffer) {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return binary;
+}
+
+// /**
+//  * @param {"encrypt" | "verify"} keyUse
+//  */
+// async function base64_to_public_key(base64Key, keyUse) {
+//   try {
+//     const binaryKey = base64_to_array_buffer(base64Key);
+
+//     if (keyUse === "encrypt") {
+//       return crypto.subtle.importKey(
+//         "spki",
+//         binaryKey,
+//         { name: "RSA-OAEP", hash: { name: "SHA-256" } },
+//         true,
+//         ["encrypt"]
+//       );
+//     } else if (keyUse === "verify") {
+//       return crypto.subtle.importKey(
+//         "spki",
+//         binaryKey,
+//         { name: "ECDSA", namedCurve: "P-256" },
+//         true,
+//         ["verify"]
+//       );
+//     }
+//   } catch (error) {
+//     console.error("failed to import public key", error);
+//     throw error;
+//   }
+// }
+
 /**
  * @param {"encrypt" | "verify"} keyUse
  */
 async function base64_to_public_key(base64Key, keyUse) {
-  const binaryKey = base64_to_array_buffer(base64Key);
+  try {
+    const binaryString = atob(base64Key);
+    const binaryKey = new Uint8Array(binaryString.length);
 
-  if (keyUse === "encrypt") {
-    return crypto.subtle.importKey(
+    for (let i = 0; i < binaryString.length; i++) {
+      binaryKey[i] = binaryString.charCodeAt(i);
+    }
+
+    const algorithm = { name: "RSA-OAEP", hash: { name: "SHA-256" } };
+    const keyUsage = keyUse === "encrypt" ? ["encrypt"] : ["verify"];
+
+    const publicKey = await crypto.subtle.importKey(
       "spki",
-      binaryKey,
-      { name: "RSA-OAEP", hash: { name: "SHA-256" } },
+      binaryKey.buffer,
+      algorithm,
       true,
-      ["encrypt"]
+      keyUsage
     );
-  } else if (keyUse === "verify") {
-    return crypto.subtle.importKey(
-      "spki",
-      binaryKey,
-      { name: "ECDSA", namedCurve: "P-256" },
-      true,
-      ["verify"]
-    );
+
+    console.log("Public key imported successfully: ", publicKey);
+    console.log("Encryption Public Key:", publicKey);
+    console.log("Is CryptoKey:", publicKey instanceof CryptoKey);
+
+    return publicKey;
+  } catch (error) {
+    console.error("failed to import public key", error);
+    throw error;
   }
 }
 
@@ -108,6 +157,8 @@ export {
   generate_signature_key_pair,
   public_key_to_base64,
   base64_to_public_key,
+  base64_to_array_buffer,
+  array_buffer_to_base64,
 };
 
 // async function store_key_pairs(encryption_key_pair, signature_key_pair) {

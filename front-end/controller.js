@@ -1,35 +1,117 @@
-import { base64_to_public_key, public_key_to_base64 } from "./key_generator.js";
-
+import {
+  base64_to_public_key,
+  public_key_to_base64,
+  base64_to_array_buffer,
+  array_buffer_to_base64,
+} from "./key_generator.js";
+import {
+  openDataBase,
+  getObjectStore,
+  getFirstRecord,
+} from "./indexedDB_helper.js";
 // let request = indexedDB.open("BlindLink", 1);
 
 function object_to_array_buffer(jsObject) {
-  const jsonString = JSON.stringify(jsObject);
+  try {
+    const jsonString = JSON.stringify(jsObject);
 
-  const buffer = new ArrayBuffer(jsonString.length);
-  const bufferView = new Uint8Array(buffer);
-  for (let i = 0; i < jsonString.length; i++) {
-    bufferView[i] = jsonString.charCodeAt(i);
+    const encoder = new TextEncoder();
+    return encoder.encode(jsonString).buffer;
+  } catch (error) {
+    console.error("An error occurred: ", error);
   }
-  return buffer; // could replace this with (bufferView.buffer)
+  // const buffer = new ArrayBuffer(jsonString.length);
+  // const bufferView = new Uint8Array(buffer);
+  // for (let i = 0; i < jsonString.length; i++) {
+  //   bufferView[i] = jsonString.charCodeAt(i);
+  // }
+  // return buffer; // could replace this with (bufferView.buffer)
+}
+
+/**
+ * @param {"encrypt" | "verify"} keyUse
+ */
+async function string_to_public_key(publicKeyString, keyUse) {
+  const binaryKey = new TextEncoder().encode(publicKeyString).buffer;
+
+  if (keyUse === "encrypt") {
+    return await crypto.subtle.importKey(
+      "spki",
+      binaryKey,
+      { name: "RSA-OAEP", hash: { name: "SHA-256" } },
+      true,
+      ["encrypt"]
+    );
+  } else if (keyUse === "verify") {
+    return await crypto.subtle.importKey(
+      "spki",
+      binaryKey,
+      { name: "ECDSA", namedCurve: "P-256" },
+      true,
+      ["verify"]
+    );
+  }
 }
 
 async function send_message(jsObject, encryptionPublicKey) {
   //DON'T FORGET TO ENCRYPT YOUR DATA
   // const data = { encrypted_message: message };
+  // try {
+  console.log("log 1");
+  // encodedData need to be split into chunks before encryption
+  const encodedData = object_to_array_buffer(jsObject); // potential problem 1
+  // const encoder = new TextEncoder();
+  // const encodedData = encoder.encode("I FUCKING HATE YOU").buffer;
 
-  const encodedData = object_to_array_buffer(jsObject);
+  console.log("log 2", encodedData.constructor.name);
+  if (encryptionPublicKey instanceof CryptoKey) {
+    console.log("something else is wrong");
+  } else {
+    console.log("FOUND IT, IT'S THE PUBLIC KEY MATHAFACKA");
+  }
 
+  console.log("Encryption Public Key:", encryptionPublicKey);
+  console.log("Is CryptoKey:", encryptionPublicKey instanceof CryptoKey);
+  console.log("Encoded Data:", encodedData);
+  console.log("Is ArrayBuffer:", encodedData instanceof ArrayBuffer);
+
+  console.log(encodedData.byteLength);
+
+  // try {
+  // apparently you can't FUCKING encrypt something that is bigger than 245 bytes
+  // AAAAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHHHHHHH
   const encryptedData = await crypto.subtle.encrypt(
     { name: "RSA-OAEP" },
     encryptionPublicKey,
     encodedData
   );
+  // } catch (error) {
+  //   console.error("an error occurred: ", error);
+  // }
+
+  // const encryptedData = await crypto.subtle.encrypt(
+  //   { name: "RSA-OAEP" },
+  //   encryptionPublicKey,
+  //   encodedData
+  // );
+
+  // } catch (error) {
+  //   console.error("encryption error", error);
+  //   throw error;
+  // }
+  // try {
+  console.log("log 3");
+
+  // const encryptedDataBase64 = array_buffer_to_base64(encryptedData);
+
+  // console.log("encrypted data: ", encryptedDataBase64);
 
   const post_options = {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
+    // body: JSON.stringify(encryptedDataBase64),
     body: JSON.stringify(encryptedData),
   };
 
@@ -46,6 +128,9 @@ async function send_message(jsObject, encryptionPublicKey) {
     .catch((error) => {
       console.error("Error:", error);
     });
+  // } catch (error) {
+  //   console.error("an error occurred: ", error);
+  // }
 }
 
 async function sign_message(privateKey, message) {
@@ -72,6 +157,8 @@ async function verify_signature(publicKey, message, signature) {
 }
 
 async function send_friend_request() {
+  console.log("very beginning");
+
   const friendEncryptionPublicKeyBase64 = document
     .querySelector("#friend-encryption-public-key")
     .value.trim();
@@ -85,6 +172,9 @@ async function send_friend_request() {
 
   const friendName = document.querySelector("#friend-name").value.trim();
 
+  console.log("trimmed and stuff");
+  console.log('"' + friendEncryptionPublicKeyBase64 + '"');
+
   if (
     !(
       friendEncryptionPublicKeyBase64 &&
@@ -97,11 +187,19 @@ async function send_friend_request() {
     return;
   }
 
+  console.log("everything was entered");
+
   // convert base64 to actual key --------------------------------------------------
   const friendEncryptionPublicKey = await base64_to_public_key(
     friendEncryptionPublicKeyBase64,
     "encrypt"
   );
+  console.log("just imported the public key");
+  console.log("Encryption Public Key:", friendEncryptionPublicKey);
+  console.log("Is CryptoKey:", friendEncryptionPublicKey instanceof CryptoKey);
+
+  console.log("converted string to public key");
+
   // const friendVerificationPublicKey = base64_to_public_key(friendVerificationPublicKeyBase64, "verify");
 
   // const message = `this is a friend request\n${introductionMessage}`;
@@ -109,38 +207,53 @@ async function send_friend_request() {
   // save both HIS public keys
   // send both YOUR public keys
   // encrypt using HIS public key
-  let myEncryptionPublicKey, myVerificationPublicKey;
 
-  let request = indexedDB.open("BlindLink", 1);
-  request.onsuccess = (e) => {
-    const newContact = {
-      friend_status: "pending",
-      contact_name: friendName,
-      encryption_public_key: friendEncryptionPublicKeyBase64,
-      verification_public_key: friendVerificationPublicKeyBase64,
-    };
+  const db = await openDataBase("BlindLink", 1);
+  const myKeysStore = getObjectStore(db, "myKeys", "readonly");
+  const record = await getFirstRecord(myKeysStore);
+  const myEncryptionPublicKey = record.encryption_public_key;
+  const myVerificationPublicKey = record.verification_public_key;
+  const mySignaturePrivatekey = record.signature_private_key;
 
-    //note you should check if you already have him as a friend
-    const db = e.target.result;
-    const contactsTx = db.transaction("contacts", "readwrite");
-    const contactsStore = contactsTx.objectStore("contacts");
-    contactsStore.add(newContact);
+  console.log("got everything from the IndexedDB database");
 
-    const myKeysTx = db.transaction("myKeys", "readonly");
-    const myKeysStore = myKeysTx.objectStore("myKeys");
-    const cursorRequest = myKeysStore.openCursor();
+  // let request = indexedDB.open("BlindLink", 1);
+  // request.onsuccess = (e) => {
+  //   const newContact = {
+  //     friend_status: "pending",
+  //     contact_name: friendName,
+  //     encryption_public_key: friendEncryptionPublicKeyBase64,
+  //     verification_public_key: friendVerificationPublicKeyBase64,
+  //   };
 
-    cursorRequest.onsuccess = (e) => {
-      const cursor = e.target.result;
-      myEncryptionPublicKey = cursor.value.encryption_public_key;
-      myVerificationPublicKey = cursor.value.verification_public_key;
-    };
-    cursorRequest.onerror = (e) => {
-      console.error("Database Error:", e.target.errorCode);
-    };
-  };
+  //   //note you should check if you already have him as a friend
+  //   const db = e.target.result;
+  //   const contactsTx = db.transaction("contacts", "readwrite");
+  //   const contactsStore = contactsTx.objectStore("contacts");
+  //   contactsStore.add(newContact);
 
-  const signature = sign_message(myVerificationPublicKey, introductionMessage);
+  //   const myKeysTx = db.transaction("myKeys", "readonly");
+  //   const myKeysStore = myKeysTx.objectStore("myKeys");
+  //   const cursorRequest = myKeysStore.openCursor();
+
+  //   cursorRequest.onsuccess = (e) => {
+  //     const cursor = e.target.result;
+  //     myEncryptionPublicKey = cursor.value.encryption_public_key;
+  //     myVerificationPublicKey = cursor.value.verification_public_key;
+  //     mySignaturePrivatekey = cursor.value.signature_private_key;
+  //   };
+  //   cursorRequest.onerror = (e) => {
+  //     console.error("Database Error:", e.target.errorCode);
+  //   };
+  // };
+  // const thePrivateKey = crypto.subtle.importKey("pkcs8", mySignaturePrivatekey, )
+
+  const signature = await sign_message(
+    mySignaturePrivatekey,
+    introductionMessage
+  );
+
+  console.log("signed the message");
 
   const data = {
     messageType: "friend request",
@@ -149,6 +262,8 @@ async function send_friend_request() {
     encryptionPublicKey: myEncryptionPublicKey,
     verificationPublicKey: myVerificationPublicKey,
   };
+
+  console.log("made the data");
 
   // const data = {
   //   type: "friend request",
@@ -165,7 +280,9 @@ async function send_friend_request() {
   //   encoded_data
   // );
 
-  await send_message(data, friendEncryptionPublicKey);
+  console.log("about to enter send_message");
+
+  send_message(data, friendEncryptionPublicKey);
   //   send_message(document.querySelector("#introduction-message").value);
   document.querySelector("#add-friend-modal").classList.toggle("hide");
 
@@ -189,7 +306,26 @@ async function send_friend_request() {
 //   }
 // }
 
-function check_mail() {
+async function decrypt_data(encryptedData, privateKey) {
+  const encryptedArrayBuffer = base64_to_array_buffer(encryptedData);
+
+  const decryptedArrayBuffer = await crypto.subtle.decrypt(
+    { name: "RSA-OAEP" },
+    privateKey,
+    encryptedArrayBuffer
+  );
+  const jsonString = new TextDecoder().decode(decryptedArrayBuffer);
+  return JSON.parse(jsonString);
+}
+
+async function getDecryptionPrivateKey() {
+  const db = await openDataBase("BlindLink", 1);
+  const myKeysStore = getObjectStore(db, "myKeys", "readonly");
+  const record = await getFirstRecord(myKeysStore);
+  return record ? record.decryption_private_key : null;
+}
+
+async function check_mail() {
   const get_options = {
     method: "get",
     headers: {
@@ -199,19 +335,70 @@ function check_mail() {
   };
 
   //              need to change the message_id value, should add a variable in localStorage holding it
-  fetch("http://127.0.0.1:8080/api/get-messages?message_id=0", get_options)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was NOT ok " + response.statusText);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      console.log("Success:", data);
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
+  const response = await fetch(
+    "http://127.0.0.1:8080/api/get-messages?message_id=0",
+    get_options
+  );
+  if (!response.ok) {
+    alert(
+      "Something went wrong when fetching from the server\n" +
+        response.statusText
+    );
+    return;
+  }
+
+  const myDecryptionPrivateKey = await getDecryptionPrivateKey();
+  // const dbRequest = indexedDB.open("BlindLink", 1);
+  // dbRequest.onsuccess = (e) => {
+  //   const db = e.target.result;
+  //   const tx = db.transaction("myKeys", "readonly");
+  //   const store = tx.objectStore("myKeys");
+  //   const cursorRequest = store.openCursor();
+
+  //   cursorRequest.onsuccess = (e) => {
+  //     const cursor = e.target.result;
+  //     myDecryptionPrivateKey = cursor.value.decryption_private_key;
+  //   };
+
+  //   cursorRequest.onerror = (e) => {
+  //     console.error("Database Cursor Error:", e.target.errorCode);
+  //   };
+  // };
+
+  // dbRequest.onerror = (e) => {
+  //   console.error("Database Error:", e.target.errorCode);
+  // };
+
+  const verificationPublicKeys = [];
+
+  const newMessages = (await response.json()).data;
+
+  let myMail = [];
+  newMessages.forEach((message) => {
+    // console.log(typeof message.encrypted_data);
+    const decryptedMessage = decrypt_data(
+      message.encrypted_data,
+      myDecryptionPrivateKey
+    );
+    if (decryptedMessage.messageType) {
+      myMail.push(decryptedMessage);
+    }
+  });
+
+  console.log(myMail);
+
+  // .then((response) => {
+  //   if (!response.ok) {
+  //     throw new Error("Network response was NOT ok " + response.statusText);
+  //   }
+  //   return response.json();
+  // })
+  // .then((data) => {
+  //   console.log("Success:", data);
+  // })
+  // .catch((error) => {
+  //   console.error("Error:", error);
+  // });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
