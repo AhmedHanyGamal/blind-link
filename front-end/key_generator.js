@@ -141,9 +141,9 @@ async function base64_to_public_key(base64Key, keyUse) {
       keyUsage
     );
 
-    console.log("Public key imported successfully: ", publicKey);
-    console.log("Encryption Public Key:", publicKey);
-    console.log("Is CryptoKey:", publicKey instanceof CryptoKey);
+    // console.log("Public key imported successfully: ", publicKey);
+    // console.log("Encryption Public Key:", publicKey);
+    // console.log("Is CryptoKey:", publicKey instanceof CryptoKey);
 
     return publicKey;
   } catch (error) {
