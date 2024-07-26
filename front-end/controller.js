@@ -13,20 +13,37 @@ import {
 // let request = indexedDB.open("BlindLink", 1);
 
 function object_to_array_buffer(jsObject) {
-  try {
-    const jsonString = JSON.stringify(jsObject);
+  // try {
+  const jsonString = JSON.stringify(jsObject);
+  console.log("JSON.stringify object: ", jsonString);
 
-    const encoder = new TextEncoder();
-    return encoder.encode(jsonString).buffer;
-  } catch (error) {
-    console.error("An error occurred: ", error);
-  }
+  const encoder = new TextEncoder();
+
+  console.log(
+    "encoded JSON.stringify object: ",
+    encoder.encode(jsonString).buffer
+  );
+
+  return encoder.encode(jsonString).buffer;
+  // } catch (error) {
+  //   console.error("An error occurred: ", error);
+  // }
   // const buffer = new ArrayBuffer(jsonString.length);
   // const bufferView = new Uint8Array(buffer);
   // for (let i = 0; i < jsonString.length; i++) {
   //   bufferView[i] = jsonString.charCodeAt(i);
   // }
   // return buffer; // could replace this with (bufferView.buffer)
+}
+
+function array_buffer_to_chunks(arrayBuffer, chunkSize) {
+  const uint8Array = new Uint8Array(arrayBuffer);
+  let chunks = [];
+  for (let i = 0; i < uint8Array.length; i += chunkSize) {
+    const chunk = uint8Array.slice(i, i + chunkSize).buffer;
+    chunks.push(chunk);
+  }
+  return chunks;
 }
 
 /**
@@ -54,26 +71,107 @@ async function string_to_public_key(publicKeyString, keyUse) {
   }
 }
 
-async function encrypt_data(data, publicKey, chunkSize = 200) {
-  const encoder = new TextEncoder();
-  const encodedData = encoder.encode(data);
-  const encryptedChunks = [];
-  for (let i = 0; i < encodedData.length; i += chunkSize) {
-    const chunk = encodedData.slice(i, i + chunkSize);
+async function encrypt_data(data, publicKey, chunkSize = 190) {
+  // try {
+  const encodedData = object_to_array_buffer(data);
+  const chunks = array_buffer_to_chunks(encodedData, chunkSize);
+
+  let encryptedChunks = [];
+  for (let chunk of chunks) {
+    console.log("chunk size: ", new Uint8Array(chunk).byteLength);
     const encryptedChunk = await crypto.subtle.encrypt(
       { name: "RSA-OAEP" },
       publicKey,
       chunk
     );
 
-    encryptedChunks.push(new Uint8Array(encryptedChunk));
+    console.log("chunk size: ", new Uint8Array(encryptedChunk).byteLength);
+    encryptedChunks.push(array_buffer_to_base64(encryptedChunk));
   }
 
-  const combinedChunks = encryptedChunks.reduce((acc, cur) => {
-    return acc.concat(Array.from(cur));
-  }, []);
+  console.log("revamped encrypted chunks: ", encryptedChunks);
 
-  return combinedChunks;
+  return encryptedChunks;
+  // } catch (err) {
+  //   console.error("FUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK");
+  //   console.error(err);
+  // }
+  // const encoder = new TextEncoder();
+  // const encodedData = encoder.encode(data);
+
+  // console.log("encoded data: ", encodedData);
+
+  // const decoder = new TextDecoder();
+  // const decodedData = decoder.decode(encodedData);
+  // console.log("decoded data: ", decodedData);
+  // console.log("size in bytes: ", encodedData.byteLength);
+  // try {
+  //   let encryptedChunks = [];
+  //   for (let i = 0; i < encodedData.length; i += chunkSize) {
+  //     const chunk = encodedData.slice(i, i + chunkSize);
+  //     const encryptedChunk = await crypto.subtle.encrypt(
+  //       { name: "RSA-OAEP" },
+  //       publicKey,
+  //       chunk
+  //     );
+
+  //     console.log(
+  //       "buffer FUCKING bytessssssssssssssss: ",
+  //       encryptedChunk.byteLength
+  //     );
+
+  //     encryptedChunks.push(array_buffer_to_base64(encryptedChunk));
+
+  //     // console.log("chunk: ", chunk);
+  //     // console.log("chunk as base64: ", array_buffer_to_base64(chunk));
+  //     // console.log("encrypted chunk: ", encryptedChunk);
+  //     // console.log(
+  //     //   "encrypted chunk as base64: ",
+  //     //   array_buffer_to_base64(encryptedChunk)
+  //     // );
+  //   }
+
+  //   console.log("encrypted Chunks", encryptedChunks);
+  //   console.log("encrypted Chunks type:", typeof encryptedChunks);
+  //   // console.log("encrypted CHUNKS VVV");
+  //   // encryptedChunks.forEach((chunk) => console.log(chunk, "\n"));
+
+  //   // return encryptedChunks;
+  //   const combinedChunks = encryptedChunks.reduce((acc, cur) => {
+  //     return acc.concat(Array.from(cur));
+  //   }, []);
+
+  //   return combinedChunks[0];
+  // } catch (error) {
+  //   console.error("THERE IS A NEW DISCOVERED ERROR");
+  // }
+}
+
+async function decrypt_message(encrypted_data, privateKey) {
+  const encryptedDataObject = JSON.parse(encrypted_data);
+  const decryptedChunks = [];
+  for (const chunk of encryptedDataObject) {
+    const chunkBuffer = base64_to_array_buffer(chunk);
+    const decryptedChunk = await crypto.subtle.decrypt(
+      { name: "RSA-OAEP" },
+      privateKey,
+      chunkBuffer
+    );
+    decryptedChunks.push(new Uint8Array(decryptedChunk));
+  }
+
+  const combinedDecryptedChunks = decryptedChunks.reduce((acc, cur) => {
+    const tmp = new Uint8Array(acc.length + cur.length);
+    tmp.set(acc, 0);
+    tmp.set(cur, acc.length);
+    return tmp;
+  }, new Uint8Array());
+
+  const decoder = new TextDecoder();
+  const jsonString = decoder.decode(combinedDecryptedChunks);
+
+  const originalObject = JSON.parse(jsonString);
+  return originalObject;
 }
 
 async function send_message(jsObject, encryptionPublicKey) {
@@ -98,13 +196,15 @@ async function send_message(jsObject, encryptionPublicKey) {
   // console.log("Encoded Data:", encodedData);
   // console.log("Is ArrayBuffer:", encodedData instanceof ArrayBuffer);
 
-  // console.log(encodedData.byteLength);
+  // console.log("jsObject size: ", jsObject.byteLength);
 
   // try {
   // apparently you can't FUCKING encrypt something that is bigger than 245 bytes
   // AAAAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 
   const encryptedData = await encrypt_data(jsObject, encryptionPublicKey);
+
+  console.log("array of base64 AAAAAAAAAAAAAAAAAAAAAA: ", encryptedData);
 
   // const encryptedData = await crypto.subtle.encrypt(
   //   { name: "RSA-OAEP" },
@@ -131,32 +231,36 @@ async function send_message(jsObject, encryptionPublicKey) {
   // const encryptedDataBase64 = array_buffer_to_base64(encryptedData);
 
   // console.log("encrypted data: ", encryptedDataBase64);
+  try {
+    const post_options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(encryptedData),
+      // body: encryptedData,
+    };
 
-  const post_options = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    // body: JSON.stringify(encryptedDataBase64),
-    body: JSON.stringify(encryptedData),
-  };
-
-  fetch("http://127.0.0.1:8080/api/post-message", post_options)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was NOT ok " + response.statusText);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      console.log("Successfully sent encrypted message:", data);
-    })
-    .catch((error) => {
-      console.error("Failed to send encrypted message:", error);
-    });
-  // } catch (error) {
-  //   console.error("an error occurred: ", error);
-  // }
+    fetch("http://127.0.0.1:8080/api/post-message", post_options)
+      .then((response) => {
+        if (!response.ok) {
+          console.error("A7A");
+          throw new Error("Network response was NOT ok " + response.statusText);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Successfully sent encrypted message:", data);
+      })
+      .catch((error) => {
+        console.error("Failed to send encrypted message:", error);
+      });
+    // } catch (error) {
+    //   console.error("an error occurred: ", error);
+    // }
+  } catch (err) {
+    console.error("FUCK YOUUUUUUUUUUUUUUUUUUUUU");
+  }
 }
 
 async function sign_message(privateKey, message) {
@@ -299,7 +403,7 @@ async function send_friend_request() {
     verificationPublicKey: myVerificationPublicKey,
   };
 
-  // console.log("made the data");
+  console.log("the A;DLFJ;AKLD JFLK;KJL;AFD data: ", data);
 
   // const data = {
   //   type: "friend request",
@@ -341,6 +445,32 @@ async function send_friend_request() {
 //     textarea.style.overflowY = "hidden"; // Hide vertical scrollbar
 //   }
 // }
+
+// The encrypted data is turned into chunks WRONG here
+async function decrypt_chunks(encryptedChunks, privateKey) {
+  const decryptedChunks = [];
+  for (const chunk of encryptedChunks) {
+    console.log(chunk);
+    const encryptedArrayBuffer = base64_to_array_buffer(chunk);
+    const decryptedChunk = await crypto.subtle.decrypt(
+      { name: "RSA-OAEP" },
+      privateKey,
+      encryptedArrayBuffer
+    );
+    decryptedChunks.push(new Uint8Array(decryptedChunk));
+  }
+
+  const combinedDecryptedChunks = decryptedChunks.reduce((acc, cur) => {
+    const tmp = new Uint8Array(acc.length + cur.length);
+    tmp.set(acc, 0);
+    tmp.set(cur, acc.length);
+    return tmp;
+  }, new Uint8Array());
+
+  const decoder = new TextDecoder();
+  const jsonString = decoder.decode(combinedDecryptedChunks);
+  return JSON.parse(jsonString);
+}
 
 async function decrypt_data(encryptedData, privateKey) {
   const encryptedArrayBuffer = base64_to_array_buffer(encryptedData);
@@ -409,17 +539,42 @@ async function check_mail() {
 
   const newMessages = (await response.json()).data;
 
+  // console.log(newMessages);
+
+  console.log("The new messages: ", newMessages);
+  // try {
+  //   console.log("encrypted message type: ", typeof newMessages.message.encrypted_data);
+  // } catch (error) {
+  //   console.error(error);
+  // }
+
   let myMail = [];
-  newMessages.forEach((message) => {
-    // console.log(typeof message.encrypted_data);
-    const decryptedMessage = decrypt_data(
+
+  for (const message of newMessages) {
+    const decryptedMessage = await decrypt_message(
       message.encrypted_data,
       myDecryptionPrivateKey
     );
+    // const decryptedMessageObject = JSON.parse(decryptedMessage);
+
     if (decryptedMessage.messageType) {
       myMail.push(decryptedMessage);
     }
-  });
+  }
+
+  // just decrypt the data now
+  // newMessages.forEach((message) => {
+  //   console.log(typeof message.encrypted_data);
+  //   console.log(message.encrypted_data);
+  //   console.log(message.encrypted_data.byteLength);
+  //   const decryptedMessage = decrypt_chunks(
+  //     message.encrypted_data,
+  //     myDecryptionPrivateKey
+  //   );
+  //   if (decryptedMessage.messageType) {
+  //     myMail.push(decryptedMessage);
+  //   }
+  // });
 
   console.log(myMail);
 

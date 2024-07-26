@@ -61,6 +61,11 @@ app.get("/api/get-messages", (req, res) => {
 app.post("/api/post-message", (req, res) => {
   const encryptedData = req.body;
 
+  // console.log("body: ", encryptedData);
+  // console.log("body after JSON.stringify: ", JSON.stringify(encryptedData));
+
+  // const encryptedData = JSON.parse(encryptedDataTemp);
+
   if (!encryptedData) {
     return res.status(400).json({
       success: false,
@@ -68,9 +73,12 @@ app.post("/api/post-message", (req, res) => {
     });
   }
 
+  const encryptedDataString = JSON.stringify(encryptedData);
+  // console.log(encryptedData);
+
   db.run(
     "INSERT INTO encrypted_data(timestamp, encrypted_data) VALUES (?, ?)",
-    [Date.now(), encryptedData],
+    [Date.now(), encryptedDataString],
     (err) => {
       if (err) {
         return res.status(500).json({
@@ -114,7 +122,7 @@ app.post("/api/post-message", (req, res) => {
 
 // db.run("DELETE FROM encrypted_messages");
 
-// db.all("SELECT * FROM encrypted_messages", (err, rows) => {
+// db.all("SELECT * FROM encrypted_data", (err, rows) => {
 //   if (err) {
 //     console.log(err);
 //   } else {
