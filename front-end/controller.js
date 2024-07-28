@@ -147,11 +147,33 @@ async function encrypt_data(data, publicKey, chunkSize = 190) {
   // }
 }
 
+function isJSONParsable(objectString) {
+  try {
+    JSON.parse(objectString);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 async function decrypt_message(encrypted_data, privateKey) {
+  if (!isJSONParsable(encrypted_data)) {
+    return null;
+  }
+
   const encryptedDataObject = JSON.parse(encrypted_data);
   const decryptedChunks = [];
   for (const chunk of encryptedDataObject) {
+    // try {
+    // } catch (error) {
+    //   console.error(55555555555555555555555555555555555555555, "A7AAAA");
+    // }
     const chunkBuffer = base64_to_array_buffer(chunk);
+
+    if (!chunkBuffer) {
+      return null;
+    }
+
     const decryptedChunk = await crypto.subtle.decrypt(
       { name: "RSA-OAEP" },
       privateKey,
@@ -170,8 +192,11 @@ async function decrypt_message(encrypted_data, privateKey) {
   const decoder = new TextDecoder();
   const jsonString = decoder.decode(combinedDecryptedChunks);
 
-  const originalObject = JSON.parse(jsonString);
-  return originalObject;
+  if (isJSONParsable(jsonString)) {
+    return JSON.parse(jsonString);
+  } else {
+    return null;
+  }
 }
 
 async function send_message(jsObject, encryptionPublicKey) {
@@ -505,6 +530,7 @@ async function check_mail() {
     "http://127.0.0.1:8080/api/get-messages?message_id=0",
     get_options
   );
+
   if (!response.ok) {
     alert(
       "Something went wrong when fetching from the server\n" +
@@ -535,7 +561,7 @@ async function check_mail() {
   //   console.error("Database Error:", e.target.errorCode);
   // };
 
-  const verificationPublicKeys = [];
+  // const verificationPublicKeys = [];
 
   const newMessages = (await response.json()).data;
 
@@ -557,7 +583,7 @@ async function check_mail() {
     );
     // const decryptedMessageObject = JSON.parse(decryptedMessage);
 
-    if (decryptedMessage.messageType) {
+    if (decryptedMessage) {
       myMail.push(decryptedMessage);
     }
   }

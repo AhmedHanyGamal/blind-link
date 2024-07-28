@@ -68,7 +68,19 @@ async function public_key_to_base64(key) {
   return base64Key;
 }
 
+function is_valid_base64(str) {
+  try {
+    return btoa(atob(str)) === str;
+  } catch (error) {
+    return false;
+  }
+}
+
 function base64_to_array_buffer(base64) {
+  if (!is_valid_base64(base64)) {
+    return null;
+  }
+
   const binaryString = atob(base64);
   const len = binaryString.length;
   const bytes = new Uint8Array(len);
