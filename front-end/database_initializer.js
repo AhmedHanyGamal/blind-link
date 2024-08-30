@@ -4,6 +4,8 @@ import {
   public_key_to_base64,
 } from "./key_generator.js";
 
+import { update_friend_requests } from "./controller.js";
+
 async function main() {
   let request = indexedDB.open("BlindLink", 1); // don't forget to delete the database from the browser
   request.onupgradeneeded = async function (event) {
@@ -27,8 +29,8 @@ async function main() {
 
     if (!db.objectStoreNames.contains("friendRequests")) {
       db.createObjectStore("friendRequests", {
-        keyPath: "id",
-        autoIncrement: true,
+        keyPath: "message_id",
+        // autoIncrement: true,
       }); // autoincrement
     }
 
@@ -172,6 +174,8 @@ async function main() {
   request.onerror = function (event) {
     console.error("Database error:", event.target.errorCode);
   };
+
+  update_friend_requests();
 }
 
 main();

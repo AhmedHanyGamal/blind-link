@@ -8,21 +8,23 @@ import {
   openDataBase,
   getObjectStore,
   getFirstRecord,
-  addEntry,
+  getAllRecords,
+  addIndexedDBEntry,
+  deleteAllRecords,
 } from "./indexedDB_helper.js";
 // let request = indexedDB.open("BlindLink", 1);
 
 function object_to_array_buffer(jsObject) {
   // try {
   const jsonString = JSON.stringify(jsObject);
-  console.log("JSON.stringify object: ", jsonString);
+  // console.log("JSON.stringify object: ", jsonString);
 
   const encoder = new TextEncoder();
 
-  console.log(
-    "encoded JSON.stringify object: ",
-    encoder.encode(jsonString).buffer
-  );
+  // console.log(
+  //   "encoded JSON.stringify object: ",
+  //   encoder.encode(jsonString).buffer
+  // );
 
   return encoder.encode(jsonString).buffer;
   // } catch (error) {
@@ -78,18 +80,18 @@ async function encrypt_data(data, publicKey, chunkSize = 190) {
 
   let encryptedChunks = [];
   for (let chunk of chunks) {
-    console.log("chunk size: ", new Uint8Array(chunk).byteLength);
+    // console.log("chunk size: ", new Uint8Array(chunk).byteLength);
     const encryptedChunk = await crypto.subtle.encrypt(
       { name: "RSA-OAEP" },
       publicKey,
       chunk
     );
 
-    console.log("chunk size: ", new Uint8Array(encryptedChunk).byteLength);
+    // console.log("chunk size: ", new Uint8Array(encryptedChunk).byteLength);
     encryptedChunks.push(array_buffer_to_base64(encryptedChunk));
   }
 
-  console.log("revamped encrypted chunks: ", encryptedChunks);
+  // console.log("revamped encrypted chunks: ", encryptedChunks);
 
   return encryptedChunks;
   // } catch (err) {
@@ -227,9 +229,11 @@ async function send_message(jsObject, encryptionPublicKey) {
   // apparently you can't FUCKING encrypt something that is bigger than 245 bytes
   // AAAAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 
+  // console.log(jsObject.signature instanceof ArrayBuffer);
+
   const encryptedData = await encrypt_data(jsObject, encryptionPublicKey);
 
-  console.log("array of base64 AAAAAAAAAAAAAAAAAAAAAA: ", encryptedData);
+  // console.log("array of base64 AAAAAAAAAAAAAAAAAAAAAA: ", encryptedData);
 
   // const encryptedData = await crypto.subtle.encrypt(
   //   { name: "RSA-OAEP" },
@@ -302,11 +306,23 @@ async function sign_message(privateKey, message) {
 async function verify_signature(publicKey, message, signature) {
   const encoder = new TextEncoder();
   const data = encoder.encode(message);
+
+  // console.log("the type of data is: ", data.buffer instanceof Object);
+  // console.log("is signature ArrayBuffer: ", signature instanceof ArrayBuffer);
+  // console.log("the type of signature is: ", typeof signature);
+  // console.log(signature instanceof Uint8Array);
+  // console.log(signature instanceof String);
+  // console.log(signature instanceof TextEncoder);
+  // console.log(signature instanceof ArrayBuffer);
+  // console.log(signature instanceof );
+  // console.log(signature instanceof );
+  // console.log(signature.constructor.name);
+
   const isValid = await crypto.subtle.verify(
     { name: "ECDSA", hash: { name: "SHA-256" } },
     publicKey,
     signature,
-    data
+    data.buffer
   );
   return isValid;
 }
@@ -372,7 +388,7 @@ async function send_friend_request() {
 
   const db = await openDataBase("BlindLink", 1);
   const myContactsStore = getObjectStore(db, "contacts", "readwrite");
-  addEntry(myContactsStore, newContact);
+  addIndexedDBEntry(myContactsStore, newContact);
 
   const myKeysStore = getObjectStore(db, "myKeys", "readonly");
   const record = await getFirstRecord(myKeysStore);
@@ -419,16 +435,17 @@ async function send_friend_request() {
   );
 
   // console.log("signed the message");
+  const signatureUint8Array = Array.from(new Uint8Array(signature));
 
   const data = {
     messageType: "friend request",
     message: introductionMessage,
-    signature: signature,
+    signature: signatureUint8Array,
     encryptionPublicKey: myEncryptionPublicKey,
     verificationPublicKey: myVerificationPublicKey,
   };
 
-  console.log("the A;DLFJ;AKLD JFLK;KJL;AFD data: ", data);
+  // console.log("the A;DLFJ;AKLD JFLK;KJL;AFD data: ", data);
 
   // const data = {
   //   type: "friend request",
@@ -475,7 +492,7 @@ async function send_friend_request() {
 async function decrypt_chunks(encryptedChunks, privateKey) {
   const decryptedChunks = [];
   for (const chunk of encryptedChunks) {
-    console.log(chunk);
+    // console.log(chunk);
     const encryptedArrayBuffer = base64_to_array_buffer(chunk);
     const decryptedChunk = await crypto.subtle.decrypt(
       { name: "RSA-OAEP" },
@@ -567,7 +584,7 @@ async function check_mail() {
 
   // console.log(newMessages);
 
-  console.log("The new messages: ", newMessages);
+  // console.log("The new messages: ", newMessages);
   // try {
   //   console.log("encrypted message type: ", typeof newMessages.message.encrypted_data);
   // } catch (error) {
@@ -584,9 +601,16 @@ async function check_mail() {
     // const decryptedMessageObject = JSON.parse(decryptedMessage);
 
     if (decryptedMessage) {
+      decryptedMessage.timestamp = message.timestamp;
+      decryptedMessage.message_id = message.id;
+
       myMail.push(decryptedMessage);
     }
   }
+  //   try {
+  // } catch (error) {
+  //   console.error("ERRORRRRRRRRRRRRRRRRRR");
+  // }
 
   // just decrypt the data now
   // newMessages.forEach((message) => {
@@ -602,7 +626,75 @@ async function check_mail() {
   //   }
   // });
 
-  console.log(myMail);
+  // console.log(myMail);
+
+  for (const mailItem of myMail) {
+    if (mailItem.messageType === "friend request") {
+      const {
+        message_id,
+        message,
+        signature,
+        encryptionPublicKey,
+        verificationPublicKey,
+      } = mailItem;
+
+      const verificationPublicKeyCrypto = await base64_to_public_key(
+        verificationPublicKey,
+        "verify"
+      );
+      // const messageArrayBuffer = base64_to_array_buffer(message);
+      // console.log("signature: ", mailItem.signature);
+
+      const signatureBuffer = new Uint8Array(signature).buffer;
+
+      const isValidSignature = await verify_signature(
+        verificationPublicKeyCrypto,
+        message,
+        signatureBuffer
+      );
+
+      console.log("Valid signature: ", isValidSignature);
+
+      if (!isValidSignature) {
+        continue;
+      }
+
+      // const verification = await crypto.subtle.verify({name:"ECDSA", hash: {name:"SHA-256"}}, encryptionPublicKeyCrypto, signature, )
+
+      const newFriendRequest = {
+        message_id: message_id,
+        encryption_public_key: encryptionPublicKey,
+        verification_public_key: verificationPublicKey,
+        intro_message: message,
+      };
+
+      const db = await openDataBase("BlindLink", 1);
+      const friendRequestStore = getObjectStore(
+        db,
+        "friendRequests",
+        "readwrite"
+      );
+      addIndexedDBEntry(
+        friendRequestStore,
+        newFriendRequest,
+        newFriendRequest.message_id
+      );
+
+      // try {
+      // } catch (err) {
+      //   console.error("FUUUUUUUUUUUUUUUUUUUUCK!!!!!!!!!!!");
+      // }
+
+      console.log("added indexedDB entry");
+    } else if (mailItem.messageType === "friend request acceptance") {
+    } else if (mailItem.messageType === "communication message") {
+    }
+  }
+
+  // change this
+  await update_friend_requests();
+  // uncomment this when you should
+  // await update_friends();
 
   // .then((response) => {
   //   if (!response.ok) {
@@ -616,6 +708,170 @@ async function check_mail() {
   // .catch((error) => {
   //   console.error("Error:", error);
   // });
+}
+
+// All that's left is to actually update the UI
+
+async function update_visible_messages(contactName) {
+  const db = await openDataBase("BlindLink", 1);
+  const messageStore = getObjectStore(db, "messages", "readonly");
+  const messages = await getAllRecords(messageStore, (record) => {
+    record.contact_name === contactName;
+  });
+
+  const chatBox = document.querySelector(".chatbox");
+
+  //   <li>
+  //   <div class="friend-request">
+  //     <div class="intro-message">
+  //       Hey man, this is {insert_name}, how's it been? accept this
+  //       friend request pls
+  //     </div>
+  //     <button type="button">accept</button>
+  //     <button type="button">decline</button>
+  //   </div>
+  // </li>
+
+  for (const message of messages) {
+  }
+}
+
+async function update_friend_requests() {
+  const db = await openDataBase("BlindLink", 1);
+  const friendRequestStore = getObjectStore(db, "friendRequests", "readonly");
+  const friendRequests = await getAllRecords(friendRequestStore);
+
+  const friendRequestsModal = document.querySelector(
+    ".leftSide .dropdown_content"
+  );
+
+  friendRequestsModal.innerHTML = "";
+
+  for (const friendRequest of friendRequests) {
+    const intro_message = friendRequest.intro_message;
+
+    const div = document.createElement("div");
+    div.style.paddingBottom = div.style.paddingTop = "10px";
+
+    const introText = document.createTextNode(intro_message);
+    div.appendChild(introText);
+
+    const accept_button = document.createElement("button", "type='button'");
+    accept_button.textContent = "accept";
+    accept_button.setAttribute("friend-request-id", friendRequest.message_id);
+
+    const decline_button = document.createElement("button", "type='button'");
+    decline_button.textContent = "decline";
+
+    accept_button.addEventListener("click", async (event) => {
+      const friendRequestID = event.target.getAttribute("friend-request-id");
+      const db = await openDataBase("BlindLink", 1);
+      const friendRequestStore = getObjectStore(
+        db,
+        "friendRequests",
+        "readwrite"
+      );
+
+      // console.log("friend request ID: ", friendRequestID);
+
+      const friendRequest = (
+        await getAllRecords(
+          friendRequestStore,
+          (record) => record.message_id == friendRequestID
+        )
+      )[0];
+
+      // console.log("friend request message: ", friendRequest);
+
+      // console.log("friend request message ID: ", friendRequest.message_id);
+
+      const { message_id, encryption_public_key, verification_public_key } =
+        friendRequest;
+
+      const temp = {
+        temp_id: message_id,
+        temp_encryption_public_key: encryption_public_key,
+        temp_verification_public_key: verification_public_key,
+      };
+
+      const newContact = {
+        id: temp.temp_id,
+        friend_status: "friend",
+        contact_name: "Test Contact Name",
+        encryption_public_key: temp.temp_encryption_public_key,
+        verification_public_key: temp.temp_verification_public_key,
+      };
+
+      // console.log(newContact.encryption_public_key);
+
+      const contactsStore = getObjectStore(db, "contacts", "readwrite");
+      addIndexedDBEntry(contactsStore, newContact, newContact.id);
+
+      //await
+      deleteAllRecords(
+        friendRequestStore,
+        (record) => record.id == friendRequestID
+      );
+    });
+
+    decline_button.addEventListener("click", (event) => {
+      const friendRequestLI = event.target.parentElement.parentElement;
+      friendRequestLI.remove();
+    });
+
+    div.appendChild(document.createElement("br"));
+
+    div.appendChild(accept_button);
+    div.appendChild(decline_button);
+
+    const li = document.createElement("li");
+
+    li.appendChild(div);
+
+    friendRequestsModal.appendChild(li);
+  }
+}
+
+async function update_friends() {
+  const db = await openDataBase("BlindLink", 1);
+  const contactStore = getObjectStore(db, "contacts", "readonly");
+  const contacts = await getAllRecords(contactStore);
+
+  const chatList = document.querySelector(".chatlist");
+
+  //   <div class="block active">
+  //   <div class="details">
+  //     <div class="listHead">
+  //       <h4>Michael Diab Al-Mansori</h4>
+  //       <p class="time">10:56</p>
+  //     </div>
+  //     <div class="message_p">
+  //       <p>How are you doing?</p>
+  //     </div>
+  //   </div>
+  // </div>
+
+  for (const contact of contacts) {
+    const div = document.createElement("div");
+    div.setAttribute("class", "block");
+
+    // to be continued
+  }
+}
+
+async function update_UI() {
+  const db = await openDataBase("BlindLink", 1);
+  const friendRequestStore = getObjectStore(db, "friendRequests", "readonly");
+  const contactStore = getObjectStore(db, "contacts", "readonly");
+  const messageStore = getObjectStore(db, "messages", "readonly");
+
+  const friendRequests = await getAllRecords(friendRequestStore);
+  const contacts = await getAllRecords(contactStore);
+
+  const friendRequestsModal = document.querySelector(
+    ".leftSide .dropdown_content"
+  );
+  const contactsList = document.querySelector(".chatlist");
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -702,3 +958,5 @@ document.addEventListener("DOMContentLoaded", function () {
 //   .catch((error) => {
 //     console.error("Error:", error);
 //   });
+
+export { update_friend_requests };

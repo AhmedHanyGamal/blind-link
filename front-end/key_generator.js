@@ -143,7 +143,10 @@ async function base64_to_public_key(base64Key, keyUse) {
       binaryKey[i] = binaryString.charCodeAt(i);
     }
 
-    const algorithm = { name: "RSA-OAEP", hash: { name: "SHA-256" } };
+    const algorithm =
+      keyUse === "encrypt"
+        ? { name: "RSA-OAEP", hash: { name: "SHA-256" } }
+        : { name: "ECDSA", namedCurve: "P-256" };
     const keyUsage = keyUse === "encrypt" ? ["encrypt"] : ["verify"];
 
     const publicKey = await crypto.subtle.importKey(

@@ -17,12 +17,31 @@ function getObjectStore(db, storeName, mode) {
   return db.transaction(storeName, mode).objectStore(storeName);
 }
 
-function addEntry(objectStore, data) {
-  const addRequest = objectStore.add(data);
-  addRequest.onsuccess = () => console.log("successfully added to database");
-  addRequest.onerror = (event) => {
+function addIndexedDBEntry(
+  objectStore,
+  data,
+  key = "something_that_should_never_be_a_key"
+) {
+  // const key = data.id;
+
+  const getRequest = objectStore.get(key);
+
+  getRequest.onsuccess = (event) => {
+    if (!event.target.result) {
+      const addRequest = objectStore.add(data);
+      addRequest.onsuccess = () =>
+        console.log("successfully added to database");
+      addRequest.onerror = (event) => {
+        console.error(
+          `error adding data to the ${objectStore} store. Error: ${event.target.errorCode}`
+        );
+      };
+    }
+  };
+
+  getRequest.onerror = (event) => {
     console.error(
-      `error adding data to the ${objectStore} store. Error: ${event.target.errorCode}`
+      `error retrieving data from the ${objectStore.name} store. Error: ${event.target.errorCode}`
     );
   };
 }
@@ -46,4 +65,66 @@ function getFirstRecord(objectStore) {
   });
 }
 
-export { openDataBase, getObjectStore, addEntry, getFirstRecord };
+function getAllRecords(
+  objectStore,
+  conditionCallbackFunction = (record) => true
+) {
+  return new Promise((resolve, reject) => {
+    let records = [];
+
+    const request = objectStore.openCursor();
+
+    request.onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (cursor) {
+        if (conditionCallbackFunction(cursor.value)) {
+          records.push(cursor.value);
+        }
+        cursor.continue();
+      } else {
+        resolve(records);
+      }
+    };
+
+    request.onerror = (event) => {
+      reject(event.target.error);
+    };
+  });
+}
+
+function deleteAllRecords(
+  objectStore,
+  conditionCallbackFunction = (record) => true
+) {
+  const cursorRequest = objectStore.openCursor();
+
+  cursorRequest.onsuccess = (event) => {
+    const cursor = event.target.result;
+    if (cursor) {
+      const record = cursor.value;
+      if (conditionCallbackFunction(record)) {
+        cursor.delete();
+      }
+      cursor.continue();
+    } else {
+      console.log("All records processed.");
+    }
+  };
+
+  cursorRequest.onerror = (event) => {
+    console.error("Error opening cursor: ", event.target.errorCode);
+  };
+
+  // return new Promise((resolve, reject) => {
+
+  // })
+}
+
+export {
+  openDataBase,
+  getObjectStore,
+  addIndexedDBEntry,
+  getFirstRecord,
+  getAllRecords,
+  deleteAllRecords,
+};
