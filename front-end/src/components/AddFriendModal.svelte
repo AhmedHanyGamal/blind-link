@@ -33,6 +33,7 @@
       const bsModalInstance = bootstrap.Modal.getInstance(modalElement);
       bsModalInstance.hide();
       friendName = yourName = friendEncryptionPublicKeyBase64 = friendVerificationPublicKeyBase64 = introMessage = ""
+      form.classList.remove('was-validated');
     }
 
 
@@ -42,14 +43,12 @@
 
         if (!form.checkValidity()) {
             form.classList.add('was-validated');
-            console.log("failed validation");
             return;
         }
 
         if (!(await is_valid_public_key_base64(friendEncryptionPublicKeyBase64, "encrypt")) || !(await is_valid_public_key_base64(friendVerificationPublicKeyBase64, "verify"))) {
             //make some front-end magic
-            console.log("invalid public keys");
-            
+            alert("Some or all of the public keys provided are invalid\nPlease provide valid public keys");            
             return;
         }
 
