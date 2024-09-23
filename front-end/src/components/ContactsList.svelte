@@ -4,9 +4,6 @@
 
 <div class="contacts-list">
     <div class="block active">
-        <!-- <div class="imgBox">
-          <img src="images/img1.jpg" class="cover" alt="" />
-        </div> -->
         <div class="details">
           <div class="listHead">
             <h4>Michael Diab Al-Mansori</h4>
@@ -19,9 +16,6 @@
       </div>
 
       <div class="block unread">
-        <!-- <div class="imgBox">
-          <img src="images/img2.jpg" class="cover" alt="" />
-        </div> -->
         <div class="details">
           <div class="listHead">
             <h4>Andre</h4>
@@ -35,9 +29,6 @@
       </div>
 
       <div class="block unread">
-        <!-- <div class="imgBox">
-          <img src="images/img3.jpg" class="cover" alt="" />
-        </div> -->
         <div class="details">
           <div class="listHead">
             <h4>Olivia</h4>
@@ -50,9 +41,6 @@
         </div>
       </div>
       <div class="block">
-        <!-- <div class="imgBox">
-          <img src="images/img4.jpg" class="cover" alt="" />
-        </div> -->
         <div class="details">
           <div class="listHead">
             <h4>Parker</h4>
@@ -64,9 +52,6 @@
         </div>
       </div>
       <div class="block">
-        <!-- <div class="imgBox">
-          <img src="images/img7.jpg" class="cover" alt="" />
-        </div> -->
         <div class="details">
           <div class="listHead">
             <h4>Zoey</h4>

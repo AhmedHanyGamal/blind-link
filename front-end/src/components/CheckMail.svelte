@@ -1,5 +1,5 @@
 <script>
-    import { getDecryptionPrivateKey, openDataBase, getObjectStore, addIndexedDBEntry, getAllRecords, getFirstRecord, updateRecordIndex, deleteAllRecords } from "../db/operations";
+    import { getDecryptionPrivateKey, openDataBase, getObjectStore, addIndexedDBEntry, getAllRecords, updateRecordIndex, deleteAllRecords } from "../db/operations";
     import { base64_to_public_key } from "../logic/KeyGenerator";
     import { decrypt_message, verify_signature } from "../logic/CryptoOperations";
 
@@ -14,6 +14,7 @@ async function check_mail() {
     },
   };
 
+  // task
   //              need to change the message_id value, should add a variable in localStorage holding it
   const response = await fetch(
     "http://127.0.0.1:8080/api/get-messages?message_id=0",
@@ -40,8 +41,6 @@ async function check_mail() {
 
   for (const message of newMessages) {
 
-    // console.log("message.encrypted_data:", message.encrypted_data);
-    // console.log("myDecryptionPrivateKey:", myDecryptionPrivateKey);
     console.log("the message being decrypted:", message);
     
     try {
@@ -112,7 +111,6 @@ async function check_mail() {
         intro_message: message,
       };
 
-      // const db = await openDataBase("BlindLink", 1);
       const friendRequestStore = getObjectStore(
         db,
         "friendRequests",
@@ -138,7 +136,6 @@ async function check_mail() {
       const {verificationPublicKey: verificationPublicKeyBase64, signature, signedData} = mailItem;
       const verificationPublicKey = await base64_to_public_key(verificationPublicKeyBase64, "verify");
 
-      // console.log("SIGNATURE: ", signature);
       
 
       console.log("const verificationPublicKey = await base64_to_public_key(verificationPublicKeyBase64, 'verify');");

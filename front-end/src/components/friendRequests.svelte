@@ -3,7 +3,7 @@
     import { send_message } from "../logic/CommunicationOperations";
     import { base64_to_public_key } from "../logic/KeyGenerator";
     import { sign_message } from "../logic/CryptoOperations";
-    // let listElement;
+
     export let additionalClasses = "";
     export let friendRequestsNumber = 0;
     
@@ -78,23 +78,19 @@
 
 
     getFriendRequests();
-
-    // export {listElement};
 </script>
 
 
-<!-- <div class="dropdown-menu {additionalClasses}"> -->
-    <ul class="dropdown-menu position-absolute top-100 mt-1 start-0 {additionalClasses}">
-        {#each friendRequests as friendRequest}
-        <li class="dropdown-item text-wrap text-break">
-            <strong><p class="mb-1">{friendRequest.friendRequester}:</p></strong>
-            <p class="mb-1">{friendRequest.intro_message}</p>
-            <button type="button" class="btn btn-outline-success btn-sm" on:click={() => acceptFriendRequest(friendRequest)}>accept</button>
-            <button type="button" class="btn btn-outline-danger btn-sm" on:click={() => declineFriendRequest(friendRequest.message_id)}>decline</button>
-        </li>
-        {/each}
-    </ul>
-<!-- </div> -->
+<ul class="dropdown-menu position-absolute top-100 mt-1 start-0 {additionalClasses}">
+    {#each friendRequests as friendRequest}
+    <li class="dropdown-item text-wrap text-break">
+        <strong><p class="mb-1">{friendRequest.friendRequester}:</p></strong>
+        <p class="mb-1">{friendRequest.intro_message}</p>
+        <button type="button" class="btn btn-outline-success btn-sm" on:click={() => acceptFriendRequest(friendRequest)}>accept</button>
+        <button type="button" class="btn btn-outline-danger btn-sm" on:click={() => declineFriendRequest(friendRequest.message_id)}>decline</button>
+    </li>
+    {/each}
+</ul>
 
 
 <style>
