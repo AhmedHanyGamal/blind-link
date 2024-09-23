@@ -23,17 +23,6 @@
     encryptionPublicKey = myKeys.encryption_public_key;
     verificationPublicKey = myKeys.verification_public_key;
   })
-
-  // const myKeys = getMyKeys();
-
-  // console.log(myKeys);
-  
-
-    // import {showPublicKeys} from "./VisibilityStores";
-    // import { createEventDispatcher } from "svelte";
-
-    // const dispatch = createEventDispatcher();
-
 </script>
 
 

@@ -11,10 +11,6 @@ import threeDotsVerticle from "../assets/images/three-dots-verticle.png";
     <div class="dropdown_button">
       <img src={threeDotsVerticle} alt="verticle dots">
     </div>
-
-      <!-- <ul class="dropdown_content hide">
-        <li id="change-contact-username-button">change contact name</li>
-      </ul> -->
 </div>
 
 <style>

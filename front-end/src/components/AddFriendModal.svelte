@@ -66,13 +66,11 @@
             mySignaturePrivateKey,
             introMessage
         );
-        // const signatureUint8Array = Array.from(new Uint8Array(signature));
 
         const data = {
             messageType: "friend request",
             name: yourName,
             message: introMessage,
-            // signature: signatureUint8Array,
             signature,
             encryptionPublicKey: myEncryptionPublicKey,
             verificationPublicKey: myVerificationPublicKey,
