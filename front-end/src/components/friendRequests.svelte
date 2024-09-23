@@ -21,7 +21,6 @@
         
         
         friendRequestsNumber = friendRequests.length;
-        console.log("friendRequestsNumber = ", friendRequestsNumber);
     }
 
     async function declineFriendRequest(friendRequestID) {
@@ -38,15 +37,13 @@
 
         const dataToSign = Math.random().toString();
         const signature = await sign_message(myKeys.signature_private_key, dataToSign);
-
-        console.log("wrong signature: ", signature);
         
         const data = {messageType: "friend request acceptance", verificationPublicKey: myKeys.verification_public_key, signature, signedData: dataToSign};
 
         const messageSent = await send_message(data, friendEncryptionPublicKey)
 
-        if (messageSent) {
-            console.log("friend request acceptance message sent successfully");
+        if (!messageSent) {
+            console.error("error sending friend request acceptance message");
         }
     }
 

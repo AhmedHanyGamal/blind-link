@@ -35,14 +35,9 @@ async function check_mail() {
 
 
   let myMail = [];
-
-  console.log("newMessages.length:", newMessages.length);
   
 
-  for (const message of newMessages) {
-
-    console.log("the message being decrypted:", message);
-    
+  for (const message of newMessages) {    
     try {
       const decryptedMessage = await decrypt_message(
         message.encrypted_data,
@@ -94,15 +89,11 @@ async function check_mail() {
         message,
         signatureBuffer
       );
-      
-      console.log("Valid signature: ", isValidSignature);
-      
+            
       if (!isValidSignature) {
         continue;
       }
-      
-      console.log("VALID SIGNATURE: ", signature);
-      
+            
       const newFriendRequest = {
         message_id,
         friendRequester,
@@ -123,45 +114,24 @@ async function check_mail() {
       );
 
       friendRequestsUpdateChannel.postMessage("update")
-
-      console.log("added indexedDB entry");
     } else if (mailItem.messageType === "friend request acceptance") {
-
-      console.log("INSIDE FRIEND REQUEST ACCEPTANCE");
-      
-
       const db = await openDataBase("BlindLink", 1);
       const myKeysObjectStore = getObjectStore(db, "myKeys", "readonly");
       
       const {verificationPublicKey: verificationPublicKeyBase64, signature, signedData} = mailItem;
-      const verificationPublicKey = await base64_to_public_key(verificationPublicKeyBase64, "verify");
-
-      
-
-      console.log("const verificationPublicKey = await base64_to_public_key(verificationPublicKeyBase64, 'verify');");
-      
+      const verificationPublicKey = await base64_to_public_key(verificationPublicKeyBase64, "verify");      
 
       const signatureBuffer = new Uint8Array(signature).buffer;
-
-      console.log("const signatureBuffer = new Uint8Array(signature).buffer;");
-      
 
       const isValidSignature = await verify_signature(
         verificationPublicKey,
         signedData,
         signatureBuffer
-      );
-
-
-      console.log("const isValidSignature = await verify_signature(verificationPublicKey, signedData, signatureBuffer);");
-      
+      );      
 
       if (!isValidSignature) {
         continue;
       }
-
-      console.log("Valid signature");
-      
 
       const contactsObjectStore = getObjectStore(db, "contacts", "readwrite");
       await updateRecordIndex(contactsObjectStore, "verification_public_key", verificationPublicKeyBase64, {friend_status: "friend"});
