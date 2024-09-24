@@ -28,9 +28,14 @@ async function initialize_DB() {
     const db = event.target.result;
 
     if (!db.objectStoreNames.contains("messages")) {
-      db.createObjectStore("messages", {
+      const objectStore = db.createObjectStore("messages", {
         keyPath: "id",
       });
+      objectStore.createIndex(
+        "verification_public_key",
+        "verification_public_key",
+        { unique: false }
+      );
     }
 
     if (!db.objectStoreNames.contains("contacts")) {
