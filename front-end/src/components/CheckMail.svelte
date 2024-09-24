@@ -138,6 +138,34 @@ async function check_mail() {
 
       contactsUpdateChannel.postMessage("update");
     } else if (mailItem.messageType === "communication message") {
+      const db = await openDataBase("BlindLink", 1);
+      const contactsObjectStore = getObjectStore(db, "contacts", "readonly");
+      const allContacts = await getAllRecords(contactsObjectStore); //could need to add a condition here like record.friend_status === "friend"
+
+      const {message, signature} = mailItem;
+
+
+      let messageSender = {};
+
+      for (const contact of allContacts) {
+        const verificationPublicKey = await base64_to_public_key(contact.verification_public_key, "verify");
+        const isValidSignature = await verify_signature(verificationPublicKey, message, signature);
+        
+        if (isValidSignature) {
+          messageSender = contact;
+          break;
+        }
+      }
+
+      if (!messageSender) {
+        continue;
+      }
+
+      const newMessage = {id: mailItem.message_id, message, timestamp: mailItem.timestamp, verification_public_key: messageSender.verification_public_key, messageType: "received"};
+      const messagesObjectStore = getObjectStore(db, "messages", "readwrite");
+      addIndexedDBEntry(messagesObjectStore, newMessage, newMessage.id);
+      
+      contactsUpdateChannel.postMessage("update");
     }
   }
 }
