@@ -1,9 +1,81 @@
 <script>
+  import { createEventDispatcher } from "svelte";
+import { openDataBase, getObjectStore, getAllRecords } from "../db/operations";
+
+
+let contacts = [];
+// let activeBlockID = null;
+const contactsUpdateChannel = new BroadcastChannel("contact_update");
+contactsUpdateChannel.onmessage = async (event) => await getContacts();
+
+
+async function getContacts() {
+  const db = await openDataBase("BlindLink", 1);
+  const contactsObjectStore = getObjectStore(db, "contacts", "readonly");
+  const allContacts = await getAllRecords(contactsObjectStore);
+  
+  contacts = allContacts.filter(contact => contact.friend_status === "friend");
+}
+
+
+
+
+  const dispatch = createEventDispatcher();
+
+  function activateContact(event, contact) {
+    // if (activeBlockID) {
+    //   const elementToDeactivate = document.getElementById(activeBlockID);
+    //   elementToDeactivate?.classList.remove("active");
+    // }
+    
+    
+    // const block = event.currentTarget;
+    // activeBlockID = contact.id;
+    
+    // console.log("block: ", block);
+    // const elementToActivate = document.getElementById(activeBlockID);
+    // elementToActivate?.classList.add("active");
+
+    dispatch('activate', contact);
+
+    // this was pretty clean in my opinion, but it didn't work for some reason, will check it out later isA
+    // const block = event.currentTarget;
+    // console.log("block: ", block);
+    // block.classList.add('active');
+    // dispatch('activate', contact);
+  }
+
+  // function handleKeyDown(event, contact) {
+  //   if (event.key === "enter") {
+  //     dispatch('activate', {contact});
+  //   }
+  // }
+
+  getContacts();
+
 
 </script>
 
 <div class="contacts-list">
-    <div class="block active">
+  {#each contacts as contact}
+    <!-- svelte-ignore a11y-no-static-element-interactions a11y-click-events-have-key-events (I will let a front-end guy deal with this stuff isA) -->
+    <div class="block" id={contact.id} on:click={(event) => activateContact(event, contact)}>
+      <div class="details">
+        <div class="listHead">
+          <h4>{contact.contact_name}</h4>
+          <p class="time">message time (don't forget to do this)</p>
+        </div>
+        <div class="message_p">
+          <p>last sent message (don't forget to do this)</p>
+        </div>
+      </div>
+    </div>
+  {/each}
+
+
+
+
+    <!-- <div class="block active">
         <div class="details">
           <div class="listHead">
             <h4>Michael Diab Al-Mansori</h4>
@@ -61,7 +133,7 @@
             <p>I'll get back to you</p>
           </div>
         </div>
-      </div>
+      </div> -->
 </div>
 
 
@@ -85,7 +157,7 @@
   cursor: pointer;
 }
 
-.block.active {
+.active {
   background: #ebebeb;
 }
 
