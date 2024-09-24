@@ -1,41 +1,38 @@
 <script lang="ts">
-  // import svelteLogo from './assets/svelte.svg'
-  // import viteLogo from '/vite.svg'
   import { initialize_DB } from "./db/db";
   import LeftSideHeader from './components/LeftSideHeader.svelte'
   import ContactsList from "./components/ContactsList.svelte";
   import RightSideHeader from "./components/RightSideHeader.svelte";
   import ChatBox from "./components/ChatBox.svelte";
   import ChatInput from "./components/ChatInput.svelte";
-  import { onMount } from "svelte";
 
 
 
-  // await initialize_DB();
 
-  // let loading = true;
+  let activeContact
 
-  // onMount(async() => {
-  //   console.log("in onMount");
+  function handleNewActiveUser(event) {
+    activeContact = event.detail
+    console.log(activeContact);
     
-  //   // await main();
-  //   try{
-  //     console.log("in try block");
+  }
+
+
+
+
+
+
+  
+  let activeFriendUsername = "Ahmed Hany G";
+  let additionalRightSideHeaderClasses = "invisible";
+
+
+  if (activeFriendUsername) {
+    additionalRightSideHeaderClasses = "";
+  }
+
+
    initialize_DB();
-      
-      // await initialize_DB();
-  //   }
-  //   catch(err) {
-  //     console.log("still didn't fucking work");
-      
-  //   }
-  //   // loading = false;
-  // })
-
-  // console.log("in App.svelte");
-  
-  
-
 </script>
 
 
@@ -46,10 +43,10 @@
 <main>
   <div class="leftSide">
     <LeftSideHeader />
-    <ContactsList />
+    <ContactsList on:activate={handleNewActiveUser}/>
   </div>
   <div class="rightSide">
-    <RightSideHeader />
+    <RightSideHeader additionalClasses={additionalRightSideHeaderClasses} friendUsername={activeFriendUsername}/>    
     <ChatBox />
     <ChatInput />
   </div>
