@@ -1,38 +1,45 @@
 <script>
     import { send_message } from "../logic/CommunicationOperations";
     import { sign_message } from "../logic/CryptoOperations";
-    import { getMyKeys } from "../db/operations";
+    import { getMyKeys, openDataBase, getObjectStore, addIndexedDBEntry } from "../db/operations";
 
     export let additionalClasses = "invisible";
-    export let encryption_public_key;
+    export let encryptionPublicKey, verificationPublicKeyBase64;
 
-    let message = "";    
+    let message = "";
 
     async function sendCommunicationMessage() {
         const myKeys = await getMyKeys();
         const signature = await sign_message(myKeys.signature_private_key, message);
         const data = {messageType: "communication message", message, signature};
-        const messageSent = await send_message(data, encryption_public_key);
-        message = "";
+        const messageSent = await send_message(data, encryptionPublicKey);
 
         return messageSent;
     }
 
+    async function addIndexedDBEntryDirectly(databaseName, objectStoreName, data, key = "something_that_would_never_be_a_key", databaseVersion = 1) {
+        const db = await openDataBase(databaseName, databaseVersion)
+        const objectStore = getObjectStore(db, objectStoreName, "readwrite");
+        addIndexedDBEntry(objectStore, data, key);
+    }
 
     async function handleKeyDown(event) {
         if (event.key === "Enter" && !event.shiftKey && message.trim() !== "") {
             event.preventDefault();
 
-            const messageSent = await sendCommunicationMessage();
+            const resultMessage = await sendCommunicationMessage();
             
-            if (messageSent) {
-                console.log("message sent successfully");
-            } else {
-                console.error("error sending message, maybe I should handle this problem...");
-            }            
+            if (!resultMessage) {
+                console.error("error sending message");
+                return;
+            }
+
+            const newMessage = {id: resultMessage.message_id, message, timestamp: Date.now(), verification_public_key: verificationPublicKeyBase64, messageType: "sent"};
+            await addIndexedDBEntryDirectly("BlindLink", "messages", newMessage, newMessage.id);
+
+            message = "";
         }
     }
-
 </script>
 
 
@@ -76,5 +83,4 @@
         background-color: #f0f0f0;
         color: black;
     }
-
 </style>
