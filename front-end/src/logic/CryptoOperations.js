@@ -114,13 +114,14 @@ async function sign_message(privateKey, message) {
 }
 
 async function verify_signature(publicKey, message, signature) {
+  const signatureBuffer = new Uint8Array(signature).buffer;
   const encoder = new TextEncoder();
   const data = encoder.encode(message);
 
   const isValid = await crypto.subtle.verify(
     { name: "ECDSA", hash: { name: "SHA-256" } },
     publicKey,
-    signature,
+    signatureBuffer,
     data.buffer
   );
   return isValid;

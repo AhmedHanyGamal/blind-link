@@ -82,12 +82,11 @@ async function check_mail() {
 
       
       
-      const signatureBuffer = new Uint8Array(signature).buffer;
       
       const isValidSignature = await verify_signature(
         verificationPublicKey,
         message,
-        signatureBuffer
+        signature
       );
             
       if (!isValidSignature) {
@@ -120,12 +119,10 @@ async function check_mail() {
       const {verificationPublicKey: verificationPublicKeyBase64, signature, signedData} = mailItem;
       const verificationPublicKey = await base64_to_public_key(verificationPublicKeyBase64, "verify");      
 
-      const signatureBuffer = new Uint8Array(signature).buffer;
-
       const isValidSignature = await verify_signature(
         verificationPublicKey,
         signedData,
-        signatureBuffer
+        signature
       );      
 
       if (!isValidSignature) {
