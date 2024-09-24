@@ -4,7 +4,7 @@
     import { decrypt_message, verify_signature } from "../logic/CryptoOperations";
 
     const friendRequestsUpdateChannel = new BroadcastChannel("friend_request_update");
-
+    const contactsUpdateChannel = new BroadcastChannel("contact_update");
 
 async function check_mail() {
   const get_options = {
@@ -139,7 +139,7 @@ async function check_mail() {
       deleteAllRecords(friendRequestObjectStore, (record) => record.verification_public_key == verificationPublicKeyBase64);
       
 
-      friendRequestsUpdateChannel.postMessage("update");
+      contactsUpdateChannel.postMessage("update");
     } else if (mailItem.messageType === "communication message") {
     }
   }
