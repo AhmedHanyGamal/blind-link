@@ -12,24 +12,20 @@ async function send_message(jsObject, encryptionPublicKey) {
       body: JSON.stringify(encryptedData),
     };
 
-    fetch("http://127.0.0.1:8080/api/post-message", post_options)
-      .then((response) => {
-        if (!response.ok) {
-          console.error("error while sending to server");
-          throw new Error("Network response was NOT ok " + response.statusText);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Successfully sent encrypted message:", data);
-      })
-      .catch((error) => {
-        console.error("Failed to send encrypted message:", error);
-      });
+    const response = await fetch(
+      "http://127.0.0.1:8080/api/post-message",
+      post_options
+    );
 
-    return true;
+    if (!response.ok) {
+      console.error("error while sending to server");
+      throw new Error("Network response was NOT ok " + response.statusText);
+    }
+
+    const data = await response.json();
+    return data;
   } catch (err) {
-    console.error("couldn't send the message");
+    console.error("failed to send encrypted message:", err);
     return false;
   }
 }

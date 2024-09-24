@@ -79,14 +79,14 @@ app.post("/api/post-message", (req, res) => {
   db.run(
     "INSERT INTO encrypted_data(timestamp, encrypted_data) VALUES (?, ?)",
     [Date.now(), encryptedDataString],
-    (err) => {
+    function (err){
       if (err) {
         return res.status(500).json({
           success: false,
           error_description: "failed to insert to the server's database",
         });
       }
-      res.status(201).json({ success: true });
+      res.status(201).json({ message_id: this.lastID });
     }
   );
 });
