@@ -5,30 +5,28 @@
   import RightSideHeader from "./components/RightSideHeader.svelte";
   import ChatBox from "./components/ChatBox.svelte";
   import ChatInput from "./components/ChatInput.svelte";
+  import { base64_to_public_key } from "./logic/KeyGenerator";
 
 
 
 
   let activeContact = {};
+  let activeEncryptionPublicKey;
 
-  function handleNewActiveUser(event) {
+  async function handleNewActiveUser(event) {
     activeContact = event.detail;
-    console.log(activeContact);
     
-    if (activeContact.contact_name) {
+    if (activeContact) {
       additionalRightSideHeaderClasses = "";
+      additionalChatInputClasses = "";
     }
+
+    activeEncryptionPublicKey = await base64_to_public_key(activeContact.encryption_public_key, "encrypt");
   }
 
 
-
-
-
-
-  
-  // let activeFriendUsername = "Ahmed Hany G";
   let additionalRightSideHeaderClasses = "invisible";
-
+  let additionalChatInputClasses = "invisible";
 
 
 
@@ -48,7 +46,7 @@
   <div class="rightSide">
     <RightSideHeader additionalClasses={additionalRightSideHeaderClasses} friendUsername={activeContact.contact_name}/>    
     <ChatBox />
-    <ChatInput />
+    <ChatInput additionalClasses={additionalChatInputClasses} encryption_public_key={activeEncryptionPublicKey}/>
   </div>
 </main>
 <!-- {/if} -->
