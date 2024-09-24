@@ -1,17 +1,52 @@
 <script>
+    import { send_message } from "../logic/CommunicationOperations";
+    import { sign_message } from "../logic/CryptoOperations";
+    import { getMyKeys } from "../db/operations";
+
+    export let additionalClasses = "invisible";
+    export let encryption_public_key;
+
+    let message = "";    
+
+    async function sendCommunicationMessage() {
+        const myKeys = await getMyKeys();
+        const signature = await sign_message(myKeys.signature_private_key, message);
+        const data = {messageType: "communication message", message, signature};
+        const messageSent = await send_message(data, encryption_public_key);
+        message = "";
+
+        return messageSent;
+    }
+
+
+    async function handleKeyDown(event) {
+        if (event.key === "Enter" && !event.shiftKey && message.trim() !== "") {
+            event.preventDefault();
+
+            const messageSent = await sendCommunicationMessage();
+            
+            if (messageSent) {
+                console.log("message sent successfully");
+            } else {
+                console.error("error sending message, maybe I should handle this problem...");
+            }            
+        }
+    }
 
 </script>
 
 
-<div class="chat_input">
+<div class="chat_input {additionalClasses}">
     <textarea
+    bind:value={message}
+    on:keydown={handleKeyDown}
     class="rounded"
-      autocomplete="off"
-      spellcheck="false"
-      id="chat-message"
-      placeholder="Type a message"
-      rows="1"
-      required
+    autocomplete="off"
+    spellcheck="false"
+    id="chat-message"
+    placeholder="Type a message"
+    rows="1"
+    required
     ></textarea>
 </div>
 
