@@ -116,7 +116,6 @@ async function check_mail() {
       friendRequestsUpdateChannel.postMessage("update")
     } else if (mailItem.messageType === "friend request acceptance") {
       const db = await openDataBase("BlindLink", 1);
-      const myKeysObjectStore = getObjectStore(db, "myKeys", "readonly");
       
       const {verificationPublicKey: verificationPublicKeyBase64, signature, signedData} = mailItem;
       const verificationPublicKey = await base64_to_public_key(verificationPublicKeyBase64, "verify");      
@@ -132,7 +131,7 @@ async function check_mail() {
       if (!isValidSignature) {
         continue;
       }
-
+      
       const contactsObjectStore = getObjectStore(db, "contacts", "readwrite");
       await updateRecordIndex(contactsObjectStore, "verification_public_key", verificationPublicKeyBase64, {friend_status: "friend"});
 
