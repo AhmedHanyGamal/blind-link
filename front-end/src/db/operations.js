@@ -222,6 +222,13 @@ async function initialize_keys(db) {
   }
 }
 
+async function getMyKeys() {
+  const db = await openDataBase("BlindLink", 1);
+  const myKeysStore = getObjectStore(db, "myKeys", "readonly");
+  const myKeys = await getFirstRecord(myKeysStore);
+  return myKeys;
+}
+
 export {
   initialize_keys,
   openDataBase,
@@ -233,4 +240,5 @@ export {
   updateRecordKey,
   updateRecordIndex,
   getDecryptionPrivateKey,
+  getMyKeys,
 };

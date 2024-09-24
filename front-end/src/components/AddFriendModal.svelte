@@ -1,7 +1,7 @@
 <script>
     import Modal from "./Modal.svelte";
     import { base64_to_public_key, is_valid_public_key_base64 } from "../logic/KeyGenerator";
-    import { openDataBase, getObjectStore, getFirstRecord, addIndexedDBEntry } from "../db/operations";
+    import { openDataBase, getObjectStore, getMyKeys, addIndexedDBEntry } from "../db/operations";
     import { sign_message } from "../logic/CryptoOperations";
     import { send_message } from "../logic/CommunicationOperations";
     export let id;
@@ -20,13 +20,6 @@
         const db = await openDataBase("BlindLink", 1);
         const myContactsStore = getObjectStore(db, "contacts", "readwrite");
         addIndexedDBEntry(myContactsStore, newContact);
-    }
-
-    async function getMyKeys() {
-        const db = await openDataBase("BlindLink", 1);
-        const myKeysStore = getObjectStore(db, "myKeys", "readonly");
-        const myKeys = await getFirstRecord(myKeysStore);
-        return myKeys;
     }
 
     function hideModal() {

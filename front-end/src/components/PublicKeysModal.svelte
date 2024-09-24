@@ -1,7 +1,6 @@
 <script>
   import { onMount } from "svelte";
-
-  import { openDataBase, getObjectStore, getFirstRecord } from "../db/operations";
+  import { getMyKeys } from "../db/operations";
 
   import Modal from "./Modal.svelte";
   export let id;
@@ -11,12 +10,6 @@
   let encryptionPublicKey;
   let verificationPublicKey;
 
-  async function getMyKeys() {
-    const db = await openDataBase("BlindLink", 1);
-    const keysStore = getObjectStore(db, "myKeys", "readonly")
-    const myKeys = await getFirstRecord(keysStore);
-    return myKeys;
-  }
 
   onMount(async () => {
     const myKeys = await getMyKeys();
