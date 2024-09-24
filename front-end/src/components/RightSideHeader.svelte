@@ -38,6 +38,7 @@ export let additionalClasses = "invisible";
         font-size: xx-large;
         line-height: 1.2em;
         margin-left: 60px;
+        margin-bottom: 0;
         color: black;
     }
 
