@@ -1,11 +1,14 @@
 <script>
 import threeDotsVerticle from "../assets/images/three-dots-verticle.png";
+export let friendUsername;
+export let additionalClasses = "invisible";
+
 </script>
 
 
-<div class="rightSideHeader">
+<div class="rightSideHeader {additionalClasses}">
     <div class="currentContact">
-      <h4>Michael Diab Al-Mansori<br /></h4>
+      <h4>{friendUsername}</h4>
     </div>
 
     <div class="dropdown_button">
