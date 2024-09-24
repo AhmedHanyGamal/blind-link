@@ -13,6 +13,7 @@
     const friendRequestsUpdateChannel = new BroadcastChannel("friend_request_update");
     friendRequestsUpdateChannel.onmessage = async (event) => await getFriendRequests();
     
+    const contactsUpdateChannel = new BroadcastChannel("contact_update");
 
     async function getFriendRequests() {
         const db = await openDataBase("BlindLink", 1);
@@ -50,7 +51,7 @@
     async function acceptFriendRequest(friendRequest) {
         const newContact = {
             id: friendRequest.message_id,
-            contact_name: "New Contact",
+            contact_name: friendRequest.friendRequester,
             encryption_public_key: friendRequest.encryption_public_key,
             verification_public_key: friendRequest.verification_public_key,
             friend_status: "friend",
@@ -69,6 +70,7 @@
         await sendFriendRequestAcceptance(friendEncryptionPublicKey)
 
         getFriendRequests();
+        contactsUpdateChannel.postMessage("update")
     }
 
 
