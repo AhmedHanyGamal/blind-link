@@ -9,12 +9,15 @@
 
 
 
-  let activeContact
+  let activeContact = {};
 
   function handleNewActiveUser(event) {
-    activeContact = event.detail
+    activeContact = event.detail;
     console.log(activeContact);
     
+    if (activeContact.contact_name) {
+      additionalRightSideHeaderClasses = "";
+    }
   }
 
 
@@ -23,13 +26,10 @@
 
 
   
-  let activeFriendUsername = "Ahmed Hany G";
+  // let activeFriendUsername = "Ahmed Hany G";
   let additionalRightSideHeaderClasses = "invisible";
 
 
-  if (activeFriendUsername) {
-    additionalRightSideHeaderClasses = "";
-  }
 
 
    initialize_DB();
@@ -46,7 +46,7 @@
     <ContactsList on:activate={handleNewActiveUser}/>
   </div>
   <div class="rightSide">
-    <RightSideHeader additionalClasses={additionalRightSideHeaderClasses} friendUsername={activeFriendUsername}/>    
+    <RightSideHeader additionalClasses={additionalRightSideHeaderClasses} friendUsername={activeContact.contact_name}/>    
     <ChatBox />
     <ChatInput />
   </div>
