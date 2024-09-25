@@ -98,6 +98,27 @@ function getAllRecords(
   });
 }
 
+function getAllRecordsIndex(objectStore, indexName, indexValue = null) {
+  return new Promise((resolve, reject) => {
+    const index = objectStore.index(indexName);
+    let request;
+
+    if (indexValue == null) {
+      request = index.getAll();
+    } else {
+      request = index.getAll(indexValue);
+    }
+
+    request.onsuccess = (event) => {
+      resolve(event.target.result);
+    };
+
+    request.onerror = (event) => {
+      reject(event.target.error);
+    };
+  });
+}
+
 function deleteAllRecords(
   objectStore,
   conditionCallbackFunction = (record) => true
@@ -236,6 +257,7 @@ export {
   addIndexedDBEntry,
   getFirstRecord,
   getAllRecords,
+  getAllRecordsIndex,
   deleteAllRecords,
   updateRecordKey,
   updateRecordIndex,
