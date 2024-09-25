@@ -45,7 +45,7 @@
   </div>
   <div class="rightSide">
     <RightSideHeader additionalClasses={additionalRightSideHeaderClasses} friendUsername={activeContact.contact_name}/>    
-    <ChatBox />
+    <ChatBox activeFriendVerificationPublicKey={activeContact.verification_public_key}/>
     <ChatInput additionalClasses={additionalChatInputClasses} encryptionPublicKey={activeEncryptionPublicKey} verificationPublicKeyBase64={activeContact.verification_public_key}/>
   </div>
 </main>
