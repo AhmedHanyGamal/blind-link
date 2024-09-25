@@ -1,6 +1,6 @@
 <script>
   import { createEventDispatcher } from "svelte";
-import { openDataBase, getObjectStore, getAllRecords } from "../db/operations";
+import { openDataBase, getObjectStore, getAllRecords, getAllRecordsIndex } from "../db/operations";
 
 
 let contacts = [];
@@ -14,7 +14,23 @@ async function getContacts() {
   const contactsObjectStore = getObjectStore(db, "contacts", "readonly");
   const allContacts = await getAllRecords(contactsObjectStore);
   
-  contacts = allContacts.filter(contact => contact.friend_status === "friend");
+  const fullContacts = allContacts.filter(contact => contact.friend_status === "friend");
+
+  const objectStore = getObjectStore(db, "messages", "readonly");
+  let contactsTimestamp = [];
+  
+  for (const fullContact of fullContacts) {
+    const messages = await getAllRecordsIndex(objectStore, "verification_public_key",fullContact.verification_public_key);
+    if (messages.length === 0) {
+      contactsTimestamp.push({fullContact, id: fullContact.id});
+      continue;
+    }
+
+    contactsTimestamp.push({fullContact, id: messages[messages.length - 1].id});
+  }
+
+  contactsTimestamp.sort((first, second) => second.id - first.id);
+  contacts = contactsTimestamp.map((object) => object.fullContact);
 }
 
 
