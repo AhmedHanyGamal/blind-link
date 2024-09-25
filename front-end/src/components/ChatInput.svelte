@@ -8,6 +8,7 @@
 
     let message = "";
     const chatUpdateChannel = new BroadcastChannel("chat_update");
+    const contactsUpdateChannel = new BroadcastChannel("contact_update");
 
     async function sendCommunicationMessage() {
         const myKeys = await getMyKeys();
@@ -40,6 +41,7 @@
 
             message = "";
             chatUpdateChannel.postMessage("update");
+            contactsUpdateChannel.postMessage("update");
         }
     }
 </script>
