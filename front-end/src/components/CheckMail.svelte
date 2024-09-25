@@ -129,7 +129,7 @@ async function check_mail() {
       }
       
       const contactsObjectStore = getObjectStore(db, "contacts", "readwrite");
-      await updateRecordIndex(contactsObjectStore, "verification_public_key", verificationPublicKeyBase64, {friend_status: "friend"});
+      await updateRecordIndex(contactsObjectStore, "verification_public_key", verificationPublicKeyBase64, {friend_status: "friend", id:mailItem.message_id});
 
       const friendRequestObjectStore = getObjectStore(db, "friendRequests", "readwrite");
       deleteAllRecords(friendRequestObjectStore, (record) => record.verification_public_key == verificationPublicKeyBase64);
