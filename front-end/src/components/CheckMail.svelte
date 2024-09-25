@@ -5,6 +5,7 @@
 
     const friendRequestsUpdateChannel = new BroadcastChannel("friend_request_update");
     const contactsUpdateChannel = new BroadcastChannel("contact_update");
+    const chatUpdateChannel = new BroadcastChannel("chat_update");
 
 async function check_mail() {
   const get_options = {
@@ -166,6 +167,7 @@ async function check_mail() {
       addIndexedDBEntry(messagesObjectStore, newMessage, newMessage.id);
       
       contactsUpdateChannel.postMessage("update");
+      chatUpdateChannel.postMessage("update");
     }
   }
 }
