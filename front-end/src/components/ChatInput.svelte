@@ -7,6 +7,7 @@
     export let encryptionPublicKey, verificationPublicKeyBase64;
 
     let message = "";
+    const chatUpdateChannel = new BroadcastChannel("chat_update");
 
     async function sendCommunicationMessage() {
         const myKeys = await getMyKeys();
@@ -38,6 +39,7 @@
             await addIndexedDBEntryDirectly("BlindLink", "messages", newMessage, newMessage.id);
 
             message = "";
+            chatUpdateChannel.postMessage("update");
         }
     }
 </script>
