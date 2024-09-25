@@ -112,8 +112,6 @@ async function check_mail() {
         newFriendRequest,
         newFriendRequest.message_id
       );
-
-      friendRequestsUpdateChannel.postMessage("update")
     } else if (mailItem.messageType === "friend request acceptance") {
       const db = await openDataBase("BlindLink", 1);
       
@@ -135,9 +133,6 @@ async function check_mail() {
 
       const friendRequestObjectStore = getObjectStore(db, "friendRequests", "readwrite");
       deleteAllRecords(friendRequestObjectStore, (record) => record.verification_public_key == verificationPublicKeyBase64);
-      
-
-      contactsUpdateChannel.postMessage("update");
     } else if (mailItem.messageType === "communication message") {
       const db = await openDataBase("BlindLink", 1);
       const contactsObjectStore = getObjectStore(db, "contacts", "readonly");
@@ -165,11 +160,11 @@ async function check_mail() {
       const newMessage = {id: mailItem.message_id, message, timestamp: mailItem.timestamp, verification_public_key: messageSender.verification_public_key, messageType: "received"};
       const messagesObjectStore = getObjectStore(db, "messages", "readwrite");
       addIndexedDBEntry(messagesObjectStore, newMessage, newMessage.id);
-      
-      contactsUpdateChannel.postMessage("update");
-      chatUpdateChannel.postMessage("update");
     }
   }
+  friendRequestsUpdateChannel.postMessage("update");
+  contactsUpdateChannel.postMessage("update");
+  chatUpdateChannel.postMessage("update");
 }
 
 </script>
