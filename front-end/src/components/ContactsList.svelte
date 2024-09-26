@@ -1,9 +1,9 @@
 <script>
   import { createEventDispatcher } from "svelte";
-import { openDataBase, getObjectStore, getAllRecords, getAllRecordsIndex } from "../db/operations";
+  import { openDataBase, getObjectStore, getAllRecords, getAllRecordsIndex } from "../db/operations";
+  import { formatTime, formatDate, truncateString } from "../logic/DataFormatting";
 
-
-let contacts = [];
+let contactsWithExtraDetails = [];
 // let activeBlockID = null;
 const contactsUpdateChannel = new BroadcastChannel("contact_update");
 contactsUpdateChannel.onmessage = async (event) => await getContacts();
@@ -16,21 +16,26 @@ async function getContacts() {
   
   const fullContacts = allContacts.filter(contact => contact.friend_status === "friend");
 
-  const objectStore = getObjectStore(db, "messages", "readonly");
+  const messagesObjectStore = getObjectStore(db, "messages", "readonly");
   let contactsTimestamp = [];
   
   for (const fullContact of fullContacts) {
-    const messages = await getAllRecordsIndex(objectStore, "verification_public_key",fullContact.verification_public_key);
+    const messages = await getAllRecordsIndex(messagesObjectStore, "verification_public_key",fullContact.verification_public_key);
     if (messages.length === 0) {
-      contactsTimestamp.push({fullContact, id: fullContact.id});
+      contactsTimestamp.push({...fullContact, mostRecentMessage:""});
       continue;
     }
 
-    contactsTimestamp.push({fullContact, id: messages[messages.length - 1].id});
+    // let mostRecentMessage = "";
+    // if (messages.length !== 0) {
+      let mostRecentMessage = messages[messages.length - 1];
+    // }
+
+    contactsTimestamp.push({...fullContact, id: mostRecentMessage.id, mostRecentMessage:mostRecentMessage.message, timestamp: mostRecentMessage.timestamp, messageType: mostRecentMessage.messageType});
   }
 
   contactsTimestamp.sort((first, second) => second.id - first.id);
-  contacts = contactsTimestamp.map((object) => object.fullContact);
+  contactsWithExtraDetails = contactsTimestamp;
 }
 
 
@@ -61,6 +66,14 @@ async function getContacts() {
     // dispatch('activate', contact);
   }
 
+
+  function daysSinceSent(timestamp) {
+  const date = new Date(timestamp); 
+  const currentDate = new Date(Date.now());
+
+  return currentDate.getDate() - date.getDate();
+}
+
   // function handleKeyDown(event, contact) {
   //   if (event.key === "enter") {
   //     dispatch('activate', {contact});
@@ -73,16 +86,16 @@ async function getContacts() {
 </script>
 
 <div class="contacts-list">
-  {#each contacts as contact}
+  {#each contactsWithExtraDetails as contact}
     <!-- svelte-ignore a11y-no-static-element-interactions a11y-click-events-have-key-events (I will let a front-end guy deal with this stuff isA) -->
     <div class="block" id={contact.id} on:click={(event) => activateContact(event, contact)}>
       <div class="details">
         <div class="listHead">
           <h4>{contact.contact_name}</h4>
-          <p class="time">message time (don't forget to do this)</p>
+          <p class="time">{contact.timestamp? (daysSinceSent(contact.timestamp) > 1? formatDate(contact.timestamp): (daysSinceSent(contact.timestamp) === 0? formatTime(contact.timestamp): "Yesterday")): ""}</p>
         </div>
         <div class="message_p">
-          <p>last sent message (don't forget to do this)</p>
+          <p>{contact.messageType === "sent"? "You: " : "friend: "}{truncateString(contact.mostRecentMessage, 31, "...")}</p>
         </div>
       </div>
     </div>
