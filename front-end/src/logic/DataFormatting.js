@@ -61,10 +61,44 @@ function array_buffer_to_base64(buffer) {
   return btoa(binary);
 }
 
+function formatDate(timestamp) {
+  const date = new Date(timestamp);
+  const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${date
+    .getMonth()
+    .toString()
+    .padStart(2, "0")}/${date.getFullYear()}`;
+  return formattedDate;
+}
+
+function formatTime(timestamp) {
+  const date = new Date(timestamp);
+  let hours = date.getHours();
+  let am_pm = hours >= 12 ? "pm" : "am";
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+
+  const formattedDate = `${hours}:${date
+    .getMinutes()
+    .toString()
+    .padStart(2, "0")} ${am_pm}`;
+  return formattedDate;
+}
+
+function truncateString(str, maxLength, substitute = "...") {
+  if (str.length > maxLength) {
+    return str.slice(0, maxLength - substitute.length) + substitute;
+  }
+
+  return str;
+}
+
 export {
   object_to_array_buffer,
   array_buffer_to_chunks,
   isJSONParsable,
   base64_to_array_buffer,
   array_buffer_to_base64,
+  formatDate,
+  formatTime,
+  truncateString,
 };

@@ -1,5 +1,6 @@
 <script>
   import { openDataBase, getObjectStore, getAllRecordsIndex } from "../db/operations";
+  import { formatDate, formatTime } from "../logic/DataFormatting";
   export let activeFriendVerificationPublicKey;
 
   let messages = [];
@@ -31,23 +32,7 @@ function scrollToBottom() {
   }, 0);
 }
 
-function formatDate(timestamp) {
-  const date = new Date(timestamp);
-  const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${date.getMonth().toString().padStart(2, '0')}/${date.getFullYear()}`
-  return formattedDate;
-}
 
-function formatTime(timestamp) {
-  const date = new Date(timestamp);
-  let hours = date.getHours();
-  let am_pm = hours >= 12? "pm" : "am";
-  hours = hours%12;
-  hours = hours? hours : 12;
-
-
-  const formattedDate = `${hours}:${date.getMinutes().toString().padStart(2, '0')} ${am_pm}`
-  return formattedDate; 
-}
 
 function isFirstMessageInDay(timestamp) {
   if (previousMessageTimestamp === null) {
