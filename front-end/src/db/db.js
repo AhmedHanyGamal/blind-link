@@ -164,6 +164,7 @@ async function initialize_DB() {
 
       const myKeysStore2 = getObjectStore(db, "myKeys", "readwrite");
       addIndexedDBEntry(myKeysStore2, userKeys);
+      localStorage.setItem("most_recent_message_ID", "0");
       console.log("Welcome new user, happy to have you with us :D");
     } else {
       console.log("Welcome back user :3");

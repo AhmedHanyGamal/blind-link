@@ -17,8 +17,10 @@ async function check_mail() {
 
   // task
   //              need to change the message_id value, should add a variable in localStorage holding it
+  let mostRecentMessageID = localStorage.getItem("most_recent_message_ID");
+
   const response = await fetch(
-    "http://127.0.0.1:8080/api/get-messages?message_id=0",
+    `http://127.0.0.1:8080/api/get-messages?message_id=${mostRecentMessageID}`,
     get_options
   );
 
@@ -33,6 +35,13 @@ async function check_mail() {
   const myDecryptionPrivateKey = await getDecryptionPrivateKey();
 
   const newMessages = (await response.json()).data;
+
+  if (newMessages.length === 0) {
+    console.log("No new messages :3");
+    return;
+  }
+
+  localStorage.setItem("most_recent_message_ID", newMessages[newMessages.length-1].id + 1);
 
 
   let myMail = [];
