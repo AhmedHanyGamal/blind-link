@@ -43,7 +43,7 @@ app.get("/api/get-messages", (req, res) => {
   // could use db.each instead, but still thinking it through
 
   db.all(
-    "SELECT * FROM encrypted_data WHERE id > ?",
+    "SELECT * FROM encrypted_data WHERE id >= ?",
     message_id,
     (err, rows) => {
       if (err) {
