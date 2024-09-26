@@ -7,6 +7,7 @@
     export let encryptionPublicKey, verificationPublicKeyBase64;
 
     let message = "";
+    let textAreaElement;
     const chatUpdateChannel = new BroadcastChannel("chat_update");
     const contactsUpdateChannel = new BroadcastChannel("contact_update");
 
@@ -44,11 +45,19 @@
             contactsUpdateChannel.postMessage("update");
         }
     }
+
+    function focusTextArea(trigger) {
+        if (textAreaElement) {
+            textAreaElement.focus();
+        }
+    }
+    $: focusTextArea(encryptionPublicKey);
 </script>
 
 
 <div class="chat_input {additionalClasses}">
     <textarea
+    bind:this={textAreaElement}
     bind:value={message}
     on:keydown={handleKeyDown}
     class="rounded"
