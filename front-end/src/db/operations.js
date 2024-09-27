@@ -4,7 +4,7 @@ import {
   public_key_to_base64,
 } from "../logic/KeyGenerator";
 
-function openDataBase(dbName, version) {
+function openDataBase(dbName, version = 1) {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(dbName, version);
     request.onsuccess = (event) => {
