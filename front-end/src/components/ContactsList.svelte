@@ -43,7 +43,7 @@ async function getContacts() {
 
   const dispatch = createEventDispatcher();
 
-  function activateContact(event, contact) {
+  async function activateContact(event, editedContact) {
     // if (activeBlockID) {
     //   const elementToDeactivate = document.getElementById(activeBlockID);
     //   elementToDeactivate?.classList.remove("active");
@@ -57,7 +57,14 @@ async function getContacts() {
     // const elementToActivate = document.getElementById(activeBlockID);
     // elementToActivate?.classList.add("active");
 
-    dispatch('activate', contact);
+    const db = await openDataBase("BlindLink");
+    const contactsObjectStore = getObjectStore(db, "contacts", "readonly");
+    const contacts = await getAllRecordsIndex(contactsObjectStore, "verification_public_key", editedContact.verification_public_key);
+
+    // console.log("contacts: ", contacts);
+    
+
+    dispatch('activate', contacts[0]);
 
     // this was pretty clean in my opinion, but it didn't work for some reason, will check it out later isA
     // const block = event.currentTarget;
