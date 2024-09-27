@@ -44,7 +44,7 @@
     <ContactsList on:activate={handleNewActiveUser}/>
   </div>
   <div class="rightSide">
-    <RightSideHeader additionalClasses={additionalRightSideHeaderClasses} friendUsername={activeContact.contact_name}/>    
+    <RightSideHeader additionalClasses={additionalRightSideHeaderClasses} {activeContact}/>    
     <ChatBox activeFriendVerificationPublicKey={activeContact.verification_public_key}/>
     <ChatInput additionalClasses={additionalChatInputClasses} encryptionPublicKey={activeEncryptionPublicKey} verificationPublicKeyBase64={activeContact.verification_public_key}/>
   </div>
