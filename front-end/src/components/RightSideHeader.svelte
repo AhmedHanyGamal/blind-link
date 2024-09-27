@@ -1,19 +1,50 @@
 <script>
 import threeDotsVerticle from "../assets/images/three-dots-verticle.png";
-export let friendUsername;
+import ChangeContactNameModal from "./ChangeContactNameModal.svelte";
+export let activeContact;
 export let additionalClasses = "invisible";
+
+const updateActiveUserNameChannel = new BroadcastChannel("update_active_user_name");
+updateActiveUserNameChannel.onmessage = (event) => {activeContact.contact_name = event.data}
+
+
+let isDropdownOpen = false;
+$: dropdownVisibility = isDropdownOpen? "show": "";
+function handleDropdown() {
+    isDropdownOpen = !isDropdownOpen;
+    // dropdownVisibility = isDropdownOpen? "show": "";
+}
 
 </script>
 
 
 <div class="rightSideHeader {additionalClasses}">
     <div class="currentContact">
-      <h4>{friendUsername}</h4>
+      <h4>{activeContact.contact_name}</h4>
     </div>
 
-    <div class="dropdown_button">
-      <img src={threeDotsVerticle} alt="verticle dots">
-    </div>
+    <button type="button" class="btn dropdown_button" on:click={handleDropdown} aria-expanded={isDropdownOpen}>
+      <img src={threeDotsVerticle} alt="verticle dots" class="img-fluid">
+    </button>
+
+    <ul class="dropdown-menu position-absolute top-100 mt-0 me-3 end-0 {dropdownVisibility}">
+        <!-- {#each friendRequests as friendRequest} -->
+        <li class="dropdown-item text-wrap text-break">
+            <button type="button" class="btn dropdown_button" data-bs-toggle="modal" data-bs-target="#change-contact-name-modal">
+                change contact name
+            </button>
+
+
+            <!-- <strong><p class="mb-1">{friendRequest.friendRequester}:</p></strong>
+            <p class="mb-1">{friendRequest.intro_message}</p>
+            <button type="button" class="btn btn-outline-success btn-sm" on:click={() => acceptFriendRequest(friendRequest)}>accept</button>
+            <button type="button" class="btn btn-outline-danger btn-sm" on:click={() => declineFriendRequest(friendRequest.message_id)}>decline</button> -->
+        </li>
+        <!-- {/each} -->
+    </ul>
+    
+
+    <ChangeContactNameModal friendID={activeContact.id} modalID="change-contact-name-modal" bind:isDropdownOpen/>
 </div>
 
 <style>
