@@ -57,14 +57,8 @@ app.get("/api/get-messages", (req, res) => {
   );
 });
 
-//question: sequential vs parallel
 app.post("/api/post-message", (req, res) => {
   const encryptedData = req.body;
-
-  // console.log("body: ", encryptedData);
-  // console.log("body after JSON.stringify: ", JSON.stringify(encryptedData));
-
-  // const encryptedData = JSON.parse(encryptedDataTemp);
 
   if (!encryptedData) {
     return res.status(400).json({
@@ -74,12 +68,11 @@ app.post("/api/post-message", (req, res) => {
   }
 
   const encryptedDataString = JSON.stringify(encryptedData);
-  // console.log(encryptedData);
 
   db.run(
     "INSERT INTO encrypted_data(timestamp, encrypted_data) VALUES (?, ?)",
     [Date.now(), encryptedDataString],
-    function (err){
+    function (err) {
       if (err) {
         return res.status(500).json({
           success: false,
@@ -91,47 +84,6 @@ app.post("/api/post-message", (req, res) => {
   );
 });
 
-// db.run(
-//   "INSERT INTO encrypted_messages(timestamp, encrypted_message) VALUES (?, ?)",
-//   [1721071951346, "Hello"]
-// );
-// db.run(
-//   "INSERT INTO encrypted_messages(timestamp, encrypted_message) VALUES (?, ?)",
-//   [1721071951350, "Is it me you're looking for"]
-// );
-// db.run(
-//   "INSERT INTO encrypted_messages(timestamp, encrypted_message) VALUES (?, ?)",
-//   [1721071951441, "I AM DA ONE"]
-// );
-// db.run(
-//   "INSERT INTO encrypted_messages(timestamp, encrypted_message) VALUES (?, ?)",
-//   [1721071951451, "DON'T WANT YOU'RE SON"]
-// );
-// db.run(
-//   "INSERT INTO encrypted_messages(timestamp, encrypted_message) VALUES (?, ?)",
-//   [1721071951541, "DON'T NEED A GUN"]
-// );
-// db.run(
-//   "INSERT INTO encrypted_messages(timestamp, encrypted_message) VALUES (?, ?)",
-//   [1721071951551, "TO GET RESPECT"]
-// );
-// db.run(
-//   "INSERT INTO encrypted_messages(timestamp, encrypted_message) VALUES (?, ?)",
-//   [1721071955541, "UP ON DA STREETZ"]
-// );
-
-// db.run("DELETE FROM encrypted_messages");
-
-// db.all("SELECT * FROM encrypted_data", (err, rows) => {
-//   if (err) {
-//     console.log(err);
-//   } else {
-//     console.log(rows);
-//   }
-// });
-
 app.listen(8080, () => {
   console.log("server listening on port 8080");
 });
-
-// console.log(Date.now());
