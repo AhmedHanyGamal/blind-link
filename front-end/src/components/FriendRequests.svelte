@@ -7,20 +7,17 @@
     export let additionalClasses = "";
     export let friendRequestsNumber = 0;
     
-    
     let friendRequests = [];
-
+    const contactsUpdateChannel = new BroadcastChannel("contact_update");
     const friendRequestsUpdateChannel = new BroadcastChannel("friend_request_update");
     friendRequestsUpdateChannel.onmessage = async (event) => await getFriendRequests();
-    
-    const contactsUpdateChannel = new BroadcastChannel("contact_update");
+
 
     async function getFriendRequests() {
         const db = await openDataBase("BlindLink", 1);
         const objectStore = getObjectStore(db, "friendRequests", "readonly");
         friendRequests = await getAllRecords(objectStore);
-        
-        
+
         friendRequestsNumber = friendRequests.length;
     }
 
@@ -40,7 +37,6 @@
         const signature = await sign_message(myKeys.signature_private_key, dataToSign);
         
         const data = {messageType: "friend request acceptance", verificationPublicKey: myKeys.verification_public_key, signature, signedData: dataToSign};
-
         const messageSent = await send_message(data, friendEncryptionPublicKey)
 
         if (!messageSent) {
@@ -61,10 +57,8 @@
         const contactsObjectStore = getObjectStore(db, "contacts", "readwrite");
         await updateRecordIndex(contactsObjectStore, "verification_public_key", newContact.verification_public_key, {...newContact});
 
-        
         const friendRequestObjectStore = getObjectStore(db, "friendRequests", "readwrite");
         deleteAllRecords(friendRequestObjectStore, (record) => record.verification_public_key == friendRequest.verification_public_key);
-
 
         const friendEncryptionPublicKey = await base64_to_public_key(newContact.encryption_public_key, "encrypt")
         await sendFriendRequestAcceptance(friendEncryptionPublicKey)
@@ -72,9 +66,6 @@
         getFriendRequests();
         contactsUpdateChannel.postMessage("update")
     }
-
-
-
 
     getFriendRequests();
 </script>
