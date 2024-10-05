@@ -15,12 +15,12 @@ async function check_mail() {
     },
   };
 
-  // task
-  //              need to change the message_id value, should add a variable in localStorage holding it
   let mostRecentMessageID = localStorage.getItem("most_recent_message_ID");
 
+  // the backend variable should be changed to the domain or ip:port of the deployed backend
+  const backend = "127.0.0.1:8080"
   const response = await fetch(
-    `http://127.0.0.1:8080/api/get-messages?message_id=${mostRecentMessageID}`,
+    `http://${backend}/api/get-messages?message_id=${mostRecentMessageID}`,
     get_options
   );
 
@@ -33,7 +33,6 @@ async function check_mail() {
   }
 
   const myDecryptionPrivateKey = await getDecryptionPrivateKey();
-
   const newMessages = (await response.json()).data;
 
   if (newMessages.length === 0) {
@@ -43,10 +42,8 @@ async function check_mail() {
 
   localStorage.setItem("most_recent_message_ID", newMessages[newMessages.length-1].id + 1);
 
-
   let myMail = [];
   
-
   for (const message of newMessages) {    
     try {
       const decryptedMessage = await decrypt_message(
@@ -66,15 +63,15 @@ async function check_mail() {
   }
 
   for (const mailItem of myMail) {
+    const db = await openDataBase("BlindLink", 1);
+
     if (mailItem.messageType === "friend request") {
-      const db = await openDataBase("BlindLink", 1);
       const contactsObjectStore = getObjectStore(db, "contacts", "readonly");
       const alreadyFriends = await getAllRecords(contactsObjectStore, (record) => record.verification_public_key === mailItem.verificationPublicKey);
 
       if (alreadyFriends.length !== 0 && alreadyFriends[0].friend_status === "friend") {
         continue;
       }
-
 
       const {
         message_id,
@@ -89,9 +86,6 @@ async function check_mail() {
         verificationPublicKeyBase64,
         "verify"
       );
-
-      
-      
       
       const isValidSignature = await verify_signature(
         verificationPublicKey,
@@ -116,14 +110,13 @@ async function check_mail() {
         "friendRequests",
         "readwrite"
       );
+
       addIndexedDBEntry(
         friendRequestStore,
         newFriendRequest,
         newFriendRequest.message_id
       );
-    } else if (mailItem.messageType === "friend request acceptance") {
-      const db = await openDataBase("BlindLink", 1);
-      
+    } else if (mailItem.messageType === "friend request acceptance") {      
       const {verificationPublicKey: verificationPublicKeyBase64, signature, signedData} = mailItem;
       const verificationPublicKey = await base64_to_public_key(verificationPublicKeyBase64, "verify");      
 
@@ -143,12 +136,9 @@ async function check_mail() {
       const friendRequestObjectStore = getObjectStore(db, "friendRequests", "readwrite");
       deleteAllRecords(friendRequestObjectStore, (record) => record.verification_public_key == verificationPublicKeyBase64);
     } else if (mailItem.messageType === "communication message") {
-      const db = await openDataBase("BlindLink", 1);
       const contactsObjectStore = getObjectStore(db, "contacts", "readonly");
-      const allContacts = await getAllRecords(contactsObjectStore); //could need to add a condition here like record.friend_status === "friend"
-
+      const allContacts = await getAllRecords(contactsObjectStore);
       const {message, signature} = mailItem;
-
 
       let messageSender = {};
 
@@ -175,13 +165,9 @@ async function check_mail() {
   contactsUpdateChannel.postMessage("update");
   chatUpdateChannel.postMessage("update");
 }
-
 </script>
 
-
-
 <button type="button" class="btn check-mail-btn" on:click={check_mail}>Check Mail</button>
-
 
 <style>
     .check-mail-btn {
