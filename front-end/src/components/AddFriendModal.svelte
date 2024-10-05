@@ -29,7 +29,6 @@
       form.classList.remove('was-validated');
     }
 
-
     async function sendFriendRequest(event) {
         event.preventDefault();
         event.stopPropagation();
@@ -40,11 +39,9 @@
         }
 
         if (!(await is_valid_public_key_base64(friendEncryptionPublicKeyBase64, "encrypt")) || !(await is_valid_public_key_base64(friendVerificationPublicKeyBase64, "verify"))) {
-            //make some front-end magic
             alert("Some or all of the public keys provided are invalid\nPlease provide valid public keys");            
             return;
         }
-
 
         const friendEncryptionPublicKey = await base64_to_public_key(
             friendEncryptionPublicKeyBase64,
@@ -74,8 +71,7 @@
             alert("the encrypt_data function probably has a chunk size that is too big, use a smaller chunk size.\nIf you don't know what that means, contact someone who does, but no one should even see this alert in the first place :^)")
             return;
         }
-        
-        
+
         await addNewContact(friendName, friendEncryptionPublicKeyBase64, friendVerificationPublicKeyBase64);
         hideModal()
     }
@@ -127,6 +123,7 @@
               placeholder="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtjhau5i0TKS0Gzm7qRIAoEOMJARdCUOff255xgcSvhos/J1LuQNmJkjLE18TTNIQt5YXtuo3wyVjCP1hGaTKLJNVoLK3Pgw9EzkpqBY2jF++zINleHFpbVQxlb0vaEOG+EfN0NcvaD7buG+JclBUPH4AgzQ/9fRPrxoHIf42tGykZ4Dgfcp1gvTPRONzaiBJdpH+FQnSDVBRG3rsd/pi+DcA1DTwz16HBH93WCizn2778qEOafG55MyD4SWcryjnrUEz36zoePf8D/7hp02yyqwTM+Y9JursxljQduYauLC0IgPwxqwTxC17r0nvGZMwYmngwi/D0k4zgkkySZDe9QIDAQAB"
               required 
               class="form-control"></textarea>
+
               <div class="invalid-feedback">Please enter your friend's encryption public key.</div>          
             </div>
 
@@ -141,6 +138,7 @@
                 placeholder="MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEVKWe6awuDcielsg22UNgqz3Q8JdDTX8YyN5YbnUYkXS3VlXiQ1u7SPeVJ303bZgT2eEndC1KvguzBg97dz4Fxg=="
                 required 
                 class="form-control"></textarea>
+
               <div class="invalid-feedback">Please enter your friend's verification public key.</div>          
             </div>
 
@@ -155,6 +153,7 @@
                 placeholder="Hello Reyad, this is Mahmoud El-Samannoudy. accept this friend request."
                 required 
                 class="form-control"></textarea>
+                
               <div class="invalid-feedback">Please write an introduction message so that your friend can know who you are and accept/decline you friend request.</div>          
             </div>
 

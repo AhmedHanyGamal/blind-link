@@ -2,8 +2,8 @@
     export let id;
     export let title;
     export let modalClasses = "";
-    let actualModalElement;
 
+    let actualModalElement;
     const titleId = Math.random().toString();
 
     export {actualModalElement as modalElement}

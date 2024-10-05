@@ -28,8 +28,6 @@
             form.classList.add("was-validated");
             return;
         }
-
-        // console.log("friendID: ",friendID);
         
         const db = await openDataBase("BlindLink");
         const contactsObjectStore = getObjectStore(db, "contacts", "readwrite");

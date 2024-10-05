@@ -23,6 +23,7 @@ async function generate_encryption_key_pair() {
     ["decrypt"]
   );
 
+  // so that the public key can be extracted, but not the private key
   const keyPair = {
     publicKey: extractableKeyPair.publicKey,
     privateKey: nonExtractablePrivateKey,
@@ -54,6 +55,7 @@ async function generate_signature_key_pair() {
     ["sign"]
   );
 
+  // same as before, so that the public key can be extracted, but not the private key
   const keyPair = {
     publicKey: extractableKeyPair.publicKey,
     privateKey: nonExtractablePrivateKey,
@@ -119,7 +121,7 @@ async function is_valid_public_key_base64(base64Key, keyUse) {
         : { name: "ECDSA", namedCurve: "P-256" };
     const keyUsage = keyUse === "verify" ? ["verify"] : ["encrypt"];
 
-    const publicKey = await crypto.subtle.importKey(
+    await crypto.subtle.importKey(
       "spki",
       binaryKey.buffer,
       algorithm,

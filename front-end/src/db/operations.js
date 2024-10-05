@@ -14,8 +14,6 @@ function openDataBase(dbName, version = 1) {
     request.onerror = (event) => {
       reject(event.target.errorCode);
     };
-
-    // could add request.onupgradeneeded, not sure if I should or not
   });
 }
 
@@ -26,10 +24,8 @@ function getObjectStore(db, storeName, mode) {
 function addIndexedDBEntry(
   objectStore,
   data,
-  key = "something_that_should_never_be_a_key"
+  key = "something_that_should_never_be_a_key" // this needs to be explained, but it would take some time, so I won't do it
 ) {
-  // const key = data.id;
-
   const getRequest = objectStore.get(key);
 
   getRequest.onsuccess = (event) => {
@@ -77,7 +73,6 @@ function getAllRecords(
 ) {
   return new Promise((resolve, reject) => {
     let records = [];
-
     const request = objectStore.openCursor();
 
     request.onsuccess = (event) => {
@@ -178,6 +173,7 @@ async function updateRecordIndex(
 
 async function updateRecordKey(objectStore, key, updatedData) {
   const getRequest = objectStore.get(key);
+
   getRequest.onsuccess = (event) => {
     const record = event.target.result;
 
@@ -187,7 +183,6 @@ async function updateRecordKey(objectStore, key, updatedData) {
     }
 
     const updatedRecord = { ...record, ...updatedData };
-
     const putRequest = objectStore.put(updatedRecord);
 
     putRequest.onsuccess = (event) => {
@@ -213,7 +208,6 @@ async function getDecryptionPrivateKey() {
 
 async function initialize_keys(db) {
   const myKeysStore = getObjectStore(db, "myKeys", "readwrite");
-
   const firstRecord = await getFirstRecord(myKeysStore);
 
   if (!firstRecord) {

@@ -43,28 +43,15 @@ async function decrypt_message(encrypted_data, privateKey) {
     return null;
   }
 
-  // console.log("It's JSON parsable");
-
   const encryptedDataObject = JSON.parse(encrypted_data);
-
-  // console.log("encryptedDataObject:", encryptedDataObject);
-
   const decryptedChunks = [];
+
   for (const chunk of encryptedDataObject) {
     const chunkBuffer = base64_to_array_buffer(chunk);
-    // console.log("chunkBuffer:", chunkBuffer);
 
     if (!chunkBuffer) {
       return null;
     }
-
-    // console.log("Valid chunk buffer (at least this time)");
-
-    // const decryptedChunk = await crypto.subtle.decrypt(
-    //   { name: "RSA-OAEP" },
-    //   privateKey,
-    //   chunkBuffer
-    // );
 
     try {
       const decryptedChunk = await crypto.subtle.decrypt(
@@ -72,11 +59,9 @@ async function decrypt_message(encrypted_data, privateKey) {
         privateKey,
         chunkBuffer
       );
-      // console.log("decryptedChunk", decryptedChunk);
 
       decryptedChunks.push(new Uint8Array(decryptedChunk));
     } catch (err) {
-      // console.error("IT WAS THE FUCKING DECRYPT FUNCTION AGAIN");
       throw new Error("Problem with decryption");
     }
   }
@@ -93,7 +78,6 @@ async function decrypt_message(encrypted_data, privateKey) {
 
   if (isJSONParsable(jsonString)) {
     console.log("decrypted successfully");
-
     return JSON.parse(jsonString);
   } else {
     return null;

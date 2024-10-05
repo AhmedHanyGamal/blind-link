@@ -2,21 +2,20 @@
   import { createEventDispatcher } from "svelte";
   import { openDataBase, getObjectStore, getAllRecords, getAllRecordsIndex } from "../db/operations";
   import { formatTime, formatDate, truncateString } from "../logic/DataFormatting";
-
-let contactsWithExtraDetails = [];
-// let activeBlockID = null;
-const contactsUpdateChannel = new BroadcastChannel("contact_update");
-contactsUpdateChannel.onmessage = async (event) => await getContacts();
+  
+  let contactsWithExtraDetails = [];
+  const dispatch = createEventDispatcher();
+  const contactsUpdateChannel = new BroadcastChannel("contact_update");
+  contactsUpdateChannel.onmessage = async (event) => await getContacts();
 
 
 async function getContacts() {
   const db = await openDataBase("BlindLink", 1);
   const contactsObjectStore = getObjectStore(db, "contacts", "readonly");
   const allContacts = await getAllRecords(contactsObjectStore);
-  
   const fullContacts = allContacts.filter(contact => contact.friend_status === "friend");
-
   const messagesObjectStore = getObjectStore(db, "messages", "readonly");
+
   let contactsTimestamp = [];
   
   for (const fullContact of fullContacts) {
@@ -26,11 +25,7 @@ async function getContacts() {
       continue;
     }
 
-    // let mostRecentMessage = "";
-    // if (messages.length !== 0) {
-      let mostRecentMessage = messages[messages.length - 1];
-    // }
-
+    let mostRecentMessage = messages[messages.length - 1];
     contactsTimestamp.push({...fullContact, id: mostRecentMessage.id, mostRecentMessage:mostRecentMessage.message, timestamp: mostRecentMessage.timestamp, messageType: mostRecentMessage.messageType});
   }
 
@@ -39,57 +34,22 @@ async function getContacts() {
 }
 
 
-
-
-  const dispatch = createEventDispatcher();
-
   async function activateContact(event, editedContact) {
-    // if (activeBlockID) {
-    //   const elementToDeactivate = document.getElementById(activeBlockID);
-    //   elementToDeactivate?.classList.remove("active");
-    // }
-    
-    
-    // const block = event.currentTarget;
-    // activeBlockID = contact.id;
-    
-    // console.log("block: ", block);
-    // const elementToActivate = document.getElementById(activeBlockID);
-    // elementToActivate?.classList.add("active");
-
     const db = await openDataBase("BlindLink");
     const contactsObjectStore = getObjectStore(db, "contacts", "readonly");
     const contacts = await getAllRecordsIndex(contactsObjectStore, "verification_public_key", editedContact.verification_public_key);
 
-    // console.log("contacts: ", contacts);
-    
-
     dispatch('activate', contacts[0]);
-
-    // this was pretty clean in my opinion, but it didn't work for some reason, will check it out later isA
-    // const block = event.currentTarget;
-    // console.log("block: ", block);
-    // block.classList.add('active');
-    // dispatch('activate', contact);
   }
 
-
   function daysSinceSent(timestamp) {
-  const date = new Date(timestamp); 
-  const currentDate = new Date(Date.now());
+    const date = new Date(timestamp); 
+    const currentDate = new Date(Date.now());
 
-  return currentDate.getDate() - date.getDate();
-}
-
-  // function handleKeyDown(event, contact) {
-  //   if (event.key === "enter") {
-  //     dispatch('activate', {contact});
-  //   }
-  // }
+    return currentDate.getDate() - date.getDate();
+  }
 
   getContacts();
-
-
 </script>
 
 <div class="contacts-list">
@@ -107,71 +67,7 @@ async function getContacts() {
       </div>
     </div>
   {/each}
-
-
-
-
-    <!-- <div class="block active">
-        <div class="details">
-          <div class="listHead">
-            <h4>Michael Diab Al-Mansori</h4>
-            <p class="time">10:56</p>
-          </div>
-          <div class="message_p">
-            <p>How are you doing?</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="block unread">
-        <div class="details">
-          <div class="listHead">
-            <h4>Andre</h4>
-            <p class="time">12:34</p>
-          </div>
-          <div class="message_p">
-            <p>I love your youtube videos!</p>
-            <b>1</b>
-          </div>
-        </div>
-      </div>
-
-      <div class="block unread">
-        <div class="details">
-          <div class="listHead">
-            <h4>Olivia</h4>
-            <p class="time">Yesterday</p>
-          </div>
-          <div class="message_p">
-            <p>I just subscribed to your channel</p>
-            <b>2</b>
-          </div>
-        </div>
-      </div>
-      <div class="block">
-        <div class="details">
-          <div class="listHead">
-            <h4>Parker</h4>
-            <p class="time">Yesterday</p>
-          </div>
-          <div class="message_p">
-            <p>Hey!</p>
-          </div>
-        </div>
-      </div>
-      <div class="block">
-        <div class="details">
-          <div class="listHead">
-            <h4>Zoey</h4>
-            <p class="time">18/01/2022</p>
-          </div>
-          <div class="message_p">
-            <p>I'll get back to you</p>
-          </div>
-        </div>
-      </div> -->
 </div>
-
 
 
 <style>
@@ -242,18 +138,6 @@ p {
   align-items: center;
 }
 
-.message_p b {
-  background: #06d755;
-  color: #fff;
-  min-width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.75rem;
-}
-
 .message_p p {
   color: #aaa;
   display: -webkit-box;
@@ -262,5 +146,4 @@ p {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 </style>

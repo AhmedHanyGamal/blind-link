@@ -8,10 +8,12 @@ function object_to_array_buffer(jsObject) {
 function array_buffer_to_chunks(arrayBuffer, chunkSize) {
   const uint8Array = new Uint8Array(arrayBuffer);
   let chunks = [];
+
   for (let i = 0; i < uint8Array.length; i += chunkSize) {
     const chunk = uint8Array.slice(i, i + chunkSize).buffer;
     chunks.push(chunk);
   }
+
   return chunks;
 }
 
@@ -37,16 +39,13 @@ function base64_to_array_buffer(base64) {
     return null;
   }
 
-  // console.log("It's a valid base64");
-
   const binaryString = atob(base64);
   const len = binaryString.length;
   const bytes = new Uint8Array(len);
+
   for (let i = 0; i < len; i++) {
     bytes[i] = binaryString.charCodeAt(i);
   }
-
-  // console.log("bytes.buffer:", bytes.buffer);
 
   return bytes.buffer;
 }
@@ -55,9 +54,11 @@ function array_buffer_to_base64(buffer) {
   let binary = "";
   const bytes = new Uint8Array(buffer);
   const len = bytes.byteLength;
+
   for (let i = 0; i < len; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
+
   return btoa(binary);
 }
 
@@ -67,6 +68,7 @@ function formatDate(timestamp) {
     .getMonth()
     .toString()
     .padStart(2, "0")}/${date.getFullYear()}`;
+
   return formattedDate;
 }
 
@@ -81,6 +83,7 @@ function formatTime(timestamp) {
     .getMinutes()
     .toString()
     .padStart(2, "0")} ${am_pm}`;
+
   return formattedDate;
 }
 
