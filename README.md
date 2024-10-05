@@ -12,8 +12,10 @@
 3. [Pros and Cons](#what-are-the-pros-and-cons-of-this-algorithm)
 4. [Is it worth it?](#is-it-worth-it)
 5. [Why I did this project](#why-i-did-this-project)
-6. [How to deploy it](#how-to-deploy-it)
-7. [Special thanks](#special-thanks)
+6. [How to run it](#how-to-run-it)
+7. [How to deploy it](#how-to-deploy-it)
+8. [Special thanks](#special-thanks)
+9. [Contributions](#contributions)
 
 
 
@@ -76,6 +78,10 @@ NO.
 Currently I am still a college student, so, I wanted to create a project from scratch that would both deepen my understanding and require a good level of experience in cryptography, while not being a typical end-to-end encryption based messaging app. Don't get me wrong end-to-end encryption is great, but I just feel like everyone knows it and a lot of people have already implemented it and published it on GitHub. <br>
 It also sounded like a really fun project to implement :^)
 
+
+## How to run it
+
+
 ## How to deploy it
 
 
@@ -83,3 +89,7 @@ It also sounded like a really fun project to implement :^)
 A huge thanks to my dear friend [Michael Youssry](https://github.com/Black-Hack) for telling me about his original idea and giving me permission to implement it. The core concept behind the secure messaging algorithm was entirely his, providing the first step for the project.
 
 While Michael came up with the overall structure and functionality of the algorithm, I worked on refining it and solving some of the remaining challenges, particularly figuring out how users would establish their initial connection. I then took on the task of fully implementing the algorithm to bring it to life.
+
+
+## Contributions
+This project is open to contribution
