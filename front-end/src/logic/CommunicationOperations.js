@@ -12,8 +12,10 @@ async function send_message(jsObject, encryptionPublicKey) {
       body: JSON.stringify(encryptedData),
     };
 
+    // the backend variable should be changed to the domain or ip:port of the deployed backend
+    const backend = "127.0.0.1:8080";
     const response = await fetch(
-      "http://127.0.0.1:8080/api/post-message",
+      `http://${backend}/api/post-message`,
       post_options
     );
 
