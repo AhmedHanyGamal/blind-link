@@ -32,8 +32,6 @@ function scrollToBottom() {
   }, 0);
 }
 
-
-
 function isFirstMessageInDay(timestamp) {
   if (previousMessageTimestamp === null) {
     previousMessageTimestamp = timestamp;
@@ -59,6 +57,7 @@ function daysSinceSent(timestamp) {
   return currentDate.getDate() - date.getDate();
 }
 
+// activeFriendVerificationPublicKey has no use other than to make the getMessages function every time the active friend is changed
 $: getMessages(activeFriendVerificationPublicKey);
 </script>
 
@@ -78,109 +77,7 @@ $: getMessages(activeFriendVerificationPublicKey);
       </p>
     </div>
   {/each}
-
-    <!-- <div class="message my_msg">
-      <p>Hi <br /><span>12:18</span></p>
-    </div>
-    <div class="message friend_msg">
-      <p>Hey <br /><span>12:18</span></p>
-    </div>
-    <div class="message my_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-        <br /><span>12:15</span>
-      </p>
-    </div>
-    <div class="message friend_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-        <br /><span>12:15</span>
-      </p>
-    </div>
-    <div class="message my_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Lorem
-        ipsum dolor sit amet consectetur adipisicing elit. Eaque aliquid
-        fugiat accusamus dolore qui vitae ratione optio sunt <br /><span
-          >12:15</span
-        >
-      </p>
-    </div>
-    <div class="message friend_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-        <br /><span>12:15</span>
-      </p>
-    </div>
-    <div class="message my_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur <br /><span>12:15</span>
-      </p>
-    </div>
-    <div class="message friend_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
-          >12:15</span
-        >
-      </p>
-    </div>
-    <div class="message my_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
-          >12:15</span
-        >
-      </p>
-    </div>
-    <div class="message friend_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
-          >12:15</span
-        >
-      </p>
-    </div>
-    <div class="message my_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
-          >12:15</span
-        >
-      </p>
-    </div>
-    <div class="message friend_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
-          >12:15</span
-        >
-      </p>
-    </div>
-    <div class="message my_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
-          >12:15</span
-        >
-      </p>
-    </div>
-    <div class="message friend_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
-          >12:15</span
-        >
-      </p>
-    </div>
-    <div class="message my_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
-          >12:15</span
-        >
-      </p>
-    </div>
-    <div class="message friend_msg">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit.<br /><span
-          >12:15</span
-        >
-      </p>
-    </div> -->
-  </div>
+</div>
 
 
   <style>
