@@ -5,11 +5,8 @@
   import Modal from "./Modal.svelte";
   export let id;
 
-
-
   let encryptionPublicKey;
   let verificationPublicKey;
-
 
   onMount(async () => {
     const myKeys = await getMyKeys();
@@ -27,6 +24,5 @@
 <p>
   Your verification public key: {verificationPublicKey}
 </p>
-
   </div>
 </Modal>

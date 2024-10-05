@@ -5,12 +5,10 @@
   import keyIcon from "../assets/images/key-icon.jpg";
 
   import PublicKeysModal from "./PublicKeysModal.svelte";
-  import FriendRequestList from "./friendRequests.svelte";
-
+  import FriendRequestList from "./FriendRequests.svelte";
   import AddFriendModal from "./AddFriendModal.svelte";
   import CheckMail from "./CheckMail.svelte";
   
-
 
   let isDropdownOpen = false;
   let additionalClasses = "";
@@ -32,21 +30,17 @@
           <img src={friendRequestIconPending} alt="pending friend requests" class="img-fluid">
         {/if}
       </button>
-        <FriendRequestList additionalClasses={additionalClasses} bind:friendRequestsNumber={friendRequestsNumber}/>
+      <FriendRequestList additionalClasses={additionalClasses} bind:friendRequestsNumber={friendRequestsNumber}/>
 
+      <button type="button" class="btn image-btn" data-bs-toggle="modal" data-bs-target="#add-friend-modal">
+        <img src={addFriendIcon} alt="add friend" class="img-fluid">
+      </button>
+      <button type="button" class="btn image-btn" data-bs-toggle="modal" data-bs-target="#public-key-modal">
+        <img src={keyIcon} alt="public keys" class="img-fluid">
+      </button>
 
-
-    <button type="button" class="btn image-btn" data-bs-toggle="modal" data-bs-target="#add-friend-modal">
-      <img src={addFriendIcon} alt="add friend" class="img-fluid">
-    </button>
-    <button type="button" class="btn image-btn" data-bs-toggle="modal" data-bs-target="#public-key-modal">
-      <img src={keyIcon} alt="public keys" class="img-fluid">
-    </button>
-
-    <CheckMail />
+      <CheckMail />
   </div>
-
-
 
   <AddFriendModal id="add-friend-modal" />
   <PublicKeysModal id="public-key-modal"/>
