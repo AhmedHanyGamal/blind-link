@@ -13,11 +13,8 @@ async function send_message(jsObject, encryptionPublicKey) {
     };
 
     // the backend variable should be changed to the domain or ip:port of the deployed backend
-    const backend = "127.0.0.1:8080";
-    const response = await fetch(
-      `http://${backend}/api/post-message`,
-      post_options
-    );
+    const backend = import.meta.env.VITE_BACKEND_DOMAIN;
+    const response = await fetch(`${backend}/api/post-message`, post_options);
 
     if (!response.ok) {
       console.error("error while sending to server");

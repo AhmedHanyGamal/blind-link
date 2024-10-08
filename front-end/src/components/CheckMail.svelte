@@ -18,9 +18,9 @@ async function check_mail() {
   let mostRecentMessageID = localStorage.getItem("most_recent_message_ID");
 
   // the backend variable should be changed to the domain or ip:port of the deployed backend
-  const backend = "127.0.0.1:8080"
+  const backend = import.meta.env.VITE_BACKEND_DOMAIN;
   const response = await fetch(
-    `http://${backend}/api/get-messages?message_id=${mostRecentMessageID}`,
+    `${backend}/api/get-messages?message_id=${mostRecentMessageID}`,
     get_options
   );
 
