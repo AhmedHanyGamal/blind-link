@@ -10,7 +10,7 @@ app.use(express.urlencoded({ extended: false }));
 
 const db = new sqlite3.Database(
   "./server-database.db",
-  sqlite3.OPEN_READWRITE, // note 2. Could change this
+  sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
   (err) => {
     if (err) {
       return console.error(err);
