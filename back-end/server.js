@@ -1,12 +1,17 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
-const cors = require("cors");
-
 const app = express();
 
-app.use(cors());
+// uncomment these two lines when developing
+// const cors = require("cors");
+// app.use(cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+require("dotenv").config();
+
+const PORT = process.env.PORT || 3000;
 
 const db = new sqlite3.Database(
   "./server-database.db",
@@ -84,6 +89,6 @@ app.post("/api/post-message", (req, res) => {
   );
 });
 
-app.listen(8080, () => {
-  console.log("server listening on port 8080");
+app.listen(PORT, () => {
+  console.log(`server listening on port ${PORT}`);
 });
