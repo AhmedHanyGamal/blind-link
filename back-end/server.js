@@ -1,20 +1,35 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
+const path = require("path")
 const app = express();
 
-// uncomment these two lines when developing
-// const cors = require("cors");
-// app.use(cors());
+let PORT = 3000;
+
+if (process.argv.includes("--cors")) {
+  const cors = require("cors");
+  app.use(cors());
+}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-require("dotenv").config();
+port_index = process.argv.indexOf("--port");
 
-const PORT = process.env.PORT || 3000;
+if (port_index >= 0) {
+  PORT = process.argv[port_index + 1];
+
+  if (!PORT) {
+    console.error("WTF are you doing, either give me an actual port number, or just let me use the default values");
+    process.exit(1);
+  }
+}
+
+
+
+
 
 const db = new sqlite3.Database(
-  "./server-database.db",
+  path.normalize("./server-database.db"),
   sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
   (err) => {
     if (err) {
