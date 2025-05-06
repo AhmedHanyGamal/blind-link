@@ -92,4 +92,4 @@ While Michael came up with the overall structure and functionality of the algori
 
 
 ## Contributions
-This project is open to contribution
+This project is open to contribution (especially the UI/UX, since it's simply terrible and doesn't even work on mobile devices (I'm not a front-end guy))
