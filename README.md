@@ -2,8 +2,11 @@
   
   # Blind Link
   #### Linking people together while being completely blind
-  
+
+  [live deployment](https://13.235.73.231:10044/)
 </div>
+
+
 
 ## Table of Contents
 
@@ -16,7 +19,6 @@
 7. [How to deploy it](#how-to-deploy-it)
 8. [Special thanks](#special-thanks)
 9. [Contributions](#contributions)
-
 
 
 ## What is Blind Link?
